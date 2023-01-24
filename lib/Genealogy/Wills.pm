@@ -53,10 +53,10 @@ sub new {
 
 =head2 search
 
-    my $obits = Genealogy::Wills->new();
+    my $wills = Genealogy::Wills->new();
 
     # Returns an array of hashrefs
-    my @smiths = $obits->search(last => 'Smith');	# You must at least define the last name to search for
+    my @smiths = $wills->search(last => 'Smith');	# You must at least define the last name to search for
 
     print $smiths[0]->{'first'}, "\n";
 
@@ -82,8 +82,8 @@ sub search {
 		my @wills = @{$self->{'wills'}->selectall_hashref(\%params)};
 		return @wills;
 	}
-	my $obit = $self->{'wills'}->fetchrow_hashref(\%params);
-	return $obit;
+	my $will = $self->{'wills'}->fetchrow_hashref(\%params);
+	return $will;
 }
 
 =head1 AUTHOR
