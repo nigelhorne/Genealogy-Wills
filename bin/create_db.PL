@@ -4,6 +4,8 @@
 #
 # -f:	force a build, otherwise it won't build on CPAN smokers or if the
 #	database is less than a day old
+#
+# TODO: handle surnames of A/B e.g. COK/COOKE
 
 use strict;
 use warnings;
