@@ -5,12 +5,12 @@ use strict;
 use Carp;
 use File::Spec;
 use Module::Info;
-use Genealogy::ObituaryDailyTimes::DB;
-use Genealogy::ObituaryDailyTimes::DB::obituaries;
+use Genealogy::Wills::DB;
+use Genealogy::Wills::DB::wills;
 
 =head1 NAME
 
-Genealogy::Wills - Lookup in a Wills database
+Genealogy::Wills - Lookup in a database of wills
 
 =head1 VERSION
 
@@ -23,17 +23,17 @@ our $VERSION = '0.01';
 =head1 SYNOPSIS
 
     # See https://freepages.rootsweb.com/~mrawson/genealogy/wills.html
-    use Genealogy::ObituaryDailyTimes;
-    my $info = Genealogy::ObituaryDailyTimes->new();
+    use Genealogy::Wills;
+    my $info = Genealogy::Wills->new();
     # ...
 
 =head1 SUBROUTINES/METHODS
 
 =head2 new
 
-Creates a Genealogy::ObituaryDailyTimes object.
+Creates a Genealogy::Wills object.
 
-Takes an optional argument, directory, that is the directory containing obituaries.sql.
+Takes an optional argument, directory, that is the directory containing wills.sql.
 
 =cut
 
@@ -41,19 +41,19 @@ sub new {
 	my($proto, %param) = @_;
 	my $class = ref($proto) || $proto;
 
-	# Use Genealogy::ObituaryDailyTimes->new, not Genealogy::ObituaryDailyTimes::new
+	# Use Genealogy::Wills->new, not Genealogy::Wills::new
 	return unless($class);
 
 	my $directory = $param{'directory'} || Module::Info->new_from_loaded(__PACKAGE__)->file();
 	$directory =~ s/\.pm$//;
 
-	Genealogy::ObituaryDailyTimes::DB::init(directory => File::Spec->catfile($directory, 'database'), %param);
+	Genealogy::Wills::DB::init(directory => File::Spec->catfile($directory, 'database'), %param);
 	return bless { }, $class;
 }
 
 =head2 search
 
-    my $obits = Genealogy::ObituaryDailyTimes->new();
+    my $obits = Genealogy::Wills->new();
 
     # Returns an array of hashrefs
     my @smiths = $obits->search(last => 'Smith');	# You must at least define the last name to search for
@@ -72,36 +72,18 @@ sub search {
 		return;
 	}
 
-	$self->{'obituaries'} ||= Genealogy::ObituaryDailyTimes::DB::obituaries->new(no_entry => 1);
+	$self->{'wills'} ||= Genealogy::Wills::DB::wills->new(no_entry => 1);
 
-	if(!defined($self->{'obituaries'})) {
-		Carp::croak("Can't open the obituaries database");
+	if(!defined($self->{'wills'})) {
+		Carp::croak("Can't open the wills database");
 	}
 
 	if(wantarray) {
-		my @obituaries = @{$self->{'obituaries'}->selectall_hashref(\%params)};
-		foreach my $obit(@obituaries) {
-			$obit->{'url'} = _create_url($obit);
-		}
-		return @obituaries;
+		my @wills = @{$self->{'wills'}->selectall_hashref(\%params)};
+		return @wills;
 	}
-	my $obit = $self->{'obituaries'}->fetchrow_hashref(\%params);
-	$obit->{'url'} = _create_url($obit);
+	my $obit = $self->{'wills'}->fetchrow_hashref(\%params);
 	return $obit;
-}
-
-sub _create_url {
-	my $obit = shift;
-	my $source = $obit->{'source'};
-	my $page = $obit->{'page'};
-
-	if($source eq 'M') {
-		return "https://mlarchives.rootsweb.com/listindexes/emails?listname=gen-obit&page=$page";
-	}
-	if($source eq 'F') {
-		return "https://www.freelists.org/post/obitdailytimes/Obituary-Daily-Times-$page";
-	}
-	Carp::croak(__PACKAGE__, ": Invalid source, '$source'");
 }
 
 =head1 AUTHOR
@@ -112,13 +94,13 @@ Nigel Horne, C<< <njh at bandsman.co.uk> >>
 
 =head1 SEE ALSO
 
-The Obituary Daily Times, L<https://sites.rootsweb.com/~obituary/>
+The Kent Wills Transcript, L<https://freepages.rootsweb.com/~mrawson/genealogy/wills.html>
 
 =head1 SUPPORT
 
 You can find documentation for this module with the perldoc command.
 
-    perldoc Genealogy::ObituaryDailyTimes
+    perldoc Genealogy::Wills
 
 You can also look for information at:
 
@@ -126,27 +108,27 @@ You can also look for information at:
 
 =item * MetaCPAN
 
-L<https://metacpan.org/release/Genealogy-ObituaryDailyTimes>
+L<https://metacpan.org/release/Genealogy-Wills>
 
 =item * RT: CPAN's request tracker
 
-L<https://rt.cpan.org/NoAuth/Bugs.html?Dist=Genealogy-ObituaryDailyTimes>
+L<https://rt.cpan.org/NoAuth/Bugs.html?Dist=Genealogy-Wills>
 
 =item * CPANTS
 
-L<http://cpants.cpanauthors.org/dist/Genealogy-ObituaryDailyTimes>
+L<http://cpants.cpanauthors.org/dist/Genealogy-Wills>
 
 =item * CPAN Testers' Matrix
 
-L<http://matrix.cpantesters.org/?dist=Genealogy-ObituaryDailyTimes>
+L<http://matrix.cpantesters.org/?dist=Genealogy-Wills>
 
 =item * CPAN Ratings
 
-L<http://cpanratings.perl.org/d/Genealogy-ObituaryDailyTimes>
+L<http://cpanratings.perl.org/d/Genealogy-Wills>
 
 =item * CPAN Testers Dependencies
 
-L<http://deps.cpantesters.org/?module=Genealogy::ObituaryDailyTimes>
+L<http://deps.cpantesters.org/?module=Genealogy::Wills>
 
 =back
 
