@@ -3,7 +3,7 @@
 # Create SQLite3 from https://freepages.rootsweb.com/~mrawson/genealogy/wills.html
 #
 # -f:	force a build, otherwise it won't build on CPAN smokers or if the
-# 	database is less than a day old
+#	database is less than a day old
 
 use strict;
 use warnings;
@@ -21,7 +21,7 @@ use Try::Tiny;
 use autodie qw(:all);
 
 sub mrawson($$);
-sub queue($$$$$$$$$);
+sub queue($$$$$);
 sub flush($);
 sub normalise_name($);
 
@@ -41,7 +41,12 @@ if(defined($ARGV[0]) && ($ARGV[0] eq '-f')) {
 	exit;
 }
 
-my $dir = 'lib/Genealogy/Wills/database';
+my $dir = 'lib/Genealogy/Wills';
+if(!-d $dir) {
+	mkdir $dir, 0755;
+}
+
+$dir = "$dir/database";
 my $filename = File::Spec->catdir($dir, 'wills.sql');
 my %normalised;
 
@@ -87,10 +92,10 @@ die "$filename: $!" if(!defined($dbh));
 
 $dbh->do('PRAGMA cache_size = -65536');	# 64MB
 $dbh->do('PRAGMA journal_mode = OFF');
-$dbh->do('CREATE TABLE wills(first NOT NULL VARCHAR, middle VARCHAR, last VARCHAR NOT NULL, year INTEGER, page VARCHAR)');
+$dbh->do('CREATE TABLE wills(first VARCHAR NOT NULL, middle VARCHAR, last VARCHAR NOT NULL, town VARCHAR, year INTEGER, url VARCHAR)');
 
 my @queue;
-foreach my $page ('AB', 'C', 'DG', 'HJ', 'KM', 'NR', 'SV', 'WY') {
+foreach my $page ('ab', 'c', 'dg', 'hj', 'km', 'nr', 'sv', 'wy') {
 	mrawson($ua, $page);
 	flush($dbh) if(scalar(@queue) > 200_000);
 };
@@ -111,7 +116,7 @@ sub mrawson($$) {
 	my $page = shift;
 	my @lines;
 
-	my $url = "https://freepages.rootsweb.com/~mrawson/genealogy/wills$page.html";
+	my $url = "https://freepages.rootsweb.com/~mrawson/genealogy/will_$page.html";
 
 	$| = 1;
 	printf "%-70s\r", $url;
@@ -131,169 +136,41 @@ sub mrawson($$) {
 
 	while(my $line = shift(@lines)) {
 		# LAST NAME, First Name (MAIDEN); Age; Place of Death; Newspaper Name; Newspaper date; tagname
-
-		next unless($line =~ /^\s*<li><a href="(.+)">(.+),\s+(.+)\s*</a> of (.+) (\d{4})/);
 		return if($line =~ /Created by/);
 
-		}
-
-		if($line =~ /<\/p>.+/) {
-			$stage = -1;
-			next;
-		}
-		if($line =~ /^LAST NAME/) {
-			# a whole entry is unparsable
-			# e.g. https://mlarchives.rootsweb.com/listindexes/emails?listname=gen-obit&page=3
-			next;
-		}
-		next if($line =~ /^\s/);
-		$line =~ s/&nbsp;/ /g;
-		$line = decode_entities($line);
-		$line =~ s/'/''/g;
-		my ($name, $age, $place, $newspaper, $date, $tag) = split(/;\s?/, $line);
-
-		next if((!defined($tag)) || ($tag eq ''));
+		next unless($line =~ /^\s*<li><a href="(.+)">(.+),\s+(.+)\s+<\/a> of (.+) (\d{4})/);
+		my ($page, $last, $first, $town, $year) = ($1, normalise_name($2), normalise_name($3), $4, $5);
 
 		# use Data::Dumper;
 		# print __LINE__, ": $page: '$line' ", Data::Dumper->new([split(/;\s?/, $line)])->Dump();
-		next unless(defined($name));
-		my ($last, $first) = split(',\s', $name);
-		my $maiden;
-		if($first) {
-			if($first =~ /(.+)\s\((.+)\)$/) {
-				$first = normalise_name($1);
-				$maiden = normalise_name($2);
-			} else {
-				$first = normalise_name($first);
-			}
-		}
-		# $age //= '';
+		# print __LINE__, ": $page: '$line'\n";
 
-		# print "$line->>>>>>>>>>\n";
-		queue($first, normalise_name($last), $maiden, $age, $place, $date, $newspaper, 'M', $page) if($last =~ /^[A-Z]/);
+		queue("$url/$page", $first, $last, "$town, Kent, England", $year);
 		# print "\"$last\",\"$first\",\"$maiden\",\"$age\",\"$place\",\"$date\",\"$newspaper\"\n" if($last =~ /^[A-Z]/);
-		$rc = 1;
 	}
-	die "Couldn't parse $url" if(!defined($rc));
-	return 1;
 }
 
-sub freelists($$) {
-	my $ua = shift;
-	my $page = shift;
-	my $url = "https://www.freelists.org/post/obitdailytimes/Obituary-Daily-Times-$page";
-
-	$| = 1;
-	printf "%-70s\r", $url;
-	$| = 0;
-
-	my $response = $ua->get($url);
-
-	my $data;
-	if($response->is_success) {
-		$data = $response->decoded_content();
-	} else {
-		if($response->status_line() ne '404 Not Found') {
-			die "\n$url: ", $response->status_line();
-		}
-		return 0;
-	}
-
-	# print $data;
-	# exit;
-
-	my @lines = split(/<br>|<br \/>$/ms, $data);
-
-	my $rc;
-
-	my $stage = 0;
-	while(my $line = shift(@lines)) {
-		# LAST NAME, First Name (MAIDEN); Age; Place of Death; Newspaper Name; Newspaper date; tagname
-
-		$line =~ s/^\n//;
-		next if($line eq '');
-		if($line =~ /\-\-\-\-\-\-\-\-/) {
-			$stage++;
-			last if($stage >= 3);
-			$line =~ s/^.*\-+//;
-			next if($line eq '');
-		}
-		next if($stage != 2);
-		$line =~ s/&nbsp;/ /g;
-		$line =~ s/\x{a0}/ /g;
-		$line = decode_entities($line);
-		$line =~ s/'/''/g;
-		my ($name, $age, $place, $newspaper, $date, $tag) = split(/;\s?/, $line);
-		if((!defined($tag)) || ($tag eq '')) {
-			my $cont = shift(@lines);
-
-			$cont =~ s/^\n//;
-			last if($cont =~ /^\-\-\-\-\-\-\-\-/);
-			$cont =~ s/&nbsp;/ /g;
-			$cont =~ s/\x{a0}/ /g;
-			$cont =~ s/&gt;/>/g;
-			$line =~ s/&quot;/"/g;
-			$line .= $cont;
-			($name, $age, $place, $newspaper, $date, $tag) = split(/;\s?/, $line);
-		}
-		# print __LINE__, ": $line: ($stage): $name, $age, $place, $newspaper, $date, $tag\n";
-		# use Data::Dumper;
-		# print __LINE__, ": $page ", Data::Dumper->new([split(/;\s?/, $line)])->Dump();
-		next unless(defined($name));
-		my ($last, $first) = split(',\s', $name);
-		next unless(defined($last));
-		next unless(defined($first));
-
-		# Parsing completely broken
-		# e.g. https://www.freelists.org/post/obitdailytimes/Obituary-Daily-Times-v25no010
-		last unless(defined($newspaper));
-
-		my $maiden;
-		if($first) {
-			if($first =~ /(.+)\s\((.+)\)$/) {
-				$first = normalise_name($1);
-				$maiden = normalise_name($2);
-			} else {
-				$first = normalise_name($first);
-			}
-		}
-		# $age //= '';
-
-		# print "$line:\n",
-			# "\t\"$last\",\"$first\",\"$age\",\"$place\",\"$date\",\"$newspaper\"\n" if($last =~ /^[A-Z]/);
-			# # "\t\"$last\",\"$first\",\"$maiden\",\"$age\",\"$place\",\"$date\",\"$newspaper\"\n" if($last =~ /^[A-Z]/);
-		queue($first, normalise_name($last), $maiden, $age, $place, $date, $newspaper, 'F', $page) if($last =~ /^[A-Z]/);
-		$rc = 1;
-	}
-	die "Couldn't parse $url" if(!defined($rc));
-	return 1;
-}
-
-sub queue($$$$$$$$$)
+sub queue($$$$$)
 {
-	my ($first, $last, $maiden, $age, $place, $date, $newspaper, $source, $page) = @_;
-
-	# If we don't know the date of publication, it's not easy to find
-	return unless(defined($date));
-
-	return unless($date =~ /^\d/);
+	my ($url, $first, $last, $town, $year) = @_;
 
 	my %columns = (
+		url => $url,
 		first => $first,
-		last => $last,
-		date => $date,
-		newspaper => $newspaper,
-		place => $place,
-		source => $source,
-		page => $page,
+		town => $town,
+		year => $year
 	);
 
-	if(defined($age) && ($age ne '')) {
-		$columns{'age'} = $age;
+	# print __LINE__, ": $first, $last\n";
+
+	if($last =~ /(.+)\sAlias\s(.+)/) {
+		$last = $1;
+		$columns{'last'} = $2;
+
+		push @queue, \%columns;
 	}
-	if($maiden) {
-		$columns{'maiden'} = $maiden;
-	}
+
+	$columns{'last'} = $last;
 	push @queue, \%columns;
 }
 
@@ -305,43 +182,24 @@ sub flush($)
 
 	while(my $row = pop @queue) {
 		if(!defined($query)) {
-			$query = 'INSERT INTO wills(first, middle, last, maiden, age, place, date, newspaper, source, page) VALUES (';
+			$query = 'INSERT INTO wills(first, middle, last, town, year, url) VALUES (';
 		} else {
 			$query .= ',(';
 		}
 		my %columns = %{$row};
+		$columns{'last'} =~ s/'/''/g;
+		$columns{'town'} =~ s/'/''/g;
 
-		if($columns{'first'}) {
-			if($columns{'first'} =~ /(.+)\s(.+)/) {
-				# Has a middle name
-				$query .= "'$1','$2','" . $columns{'last'} . "',";
-			} else {
-				$query .= "'" . $columns{'first'} . "',NULL,'" . $columns{'last'} . "',";
-			}
+		if($columns{'first'} =~ /(.+)\s(.+)/) {
+			# Has a middle name
+			# use Data::Dumper;
+			# print __LINE__, ': ', Data::Dumper->new([\%columns])->Dump();
+			$query .= "'$1','$2',";
 		} else {
-			$query .= "NULL,NULL,'" . $columns{'last'} . "',";
+			$query .= "'" . $columns{'first'} . "',NULL,";
 		}
-		if($columns{'maiden'} && ($columns{'maiden'} ne ' ')) {
-			$query .= "'" . $columns{'maiden'} . "',";
-		} else {
-			$query .= 'NULL,';
-		}
-		if($columns{'age'}) {
-			$query .= "'" . $columns{'age'} . "',";
-		} else {
-			$query .= 'NULL,';
-		}
-		if($columns{'place'} && ($columns{'place'} ne '')) {
-			$query .= "'" . $columns{'place'} . "',";
-		} else {
-			$query .= 'NULL,';
-		}
-		if($columns{'date'}) {
-			$query .= "'" . $columns{'date'} . "',";
-		} else {
-			$query .= 'NULL,';
-		}
-		$query .= "'" . $columns{'newspaper'} . "','" . $columns{'source'} . "','" . $columns{'page'} . "')";
+		$query .= "'" . $columns{'last'} . "','" .
+			$columns{'town'} . "'," . $columns{'year'} . ",'" . $columns{'url'} . "')";
 	}
 
 	# $| = 1;
