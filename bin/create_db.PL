@@ -129,51 +129,13 @@ sub mrawson($$) {
 	$data =~ s/\r//g;
 	@lines = split(/$/ms, $data);
 
-	# -1 => header, 0 => post-preamble, 1 => post
-	my $stage = -1;
-
-	my $last_line;
-	my $rc;
-
 	while(my $line = shift(@lines)) {
 		# LAST NAME, First Name (MAIDEN); Age; Place of Death; Newspaper Name; Newspaper date; tagname
 
-		next if((defined($last_line)) && ($line eq $last_line));
-		$last_line = $line;
+		next unless($line =~ /^\s*<li><a href="(.+)">(.+),\s+(.+)\s*</a> of (.+) (\d{4})/);
+		return if($line =~ /Created by/);
 
-		$line =~ s/^\n//;
-		# print "$stage: $line\n";
-		if($line =~ /^------/) {
-			if($stage == -1) {
-				if($line =~ /No Results/) {
-					# Last page
-					return 0;
-				}
-				# Introduction to a post about to start
-				$stage = 0;
-			} elsif($stage == 0) {
-				# Post contents about to start
-				$stage = 1;
-			} else {
-				# Introduction to a post about to start
-				$stage = 0;
-			}
-			next;
-		} elsif($stage == -1) {
-			if($line =~ /^LAST NAME/) {
-				# The ----- probably didn't start a line
-				# e.g. https://mlarchives.rootsweb.com/listindexes/emails?listname=gen-obit&page=41
-				$stage = 0;
-			} elsif($line =~ /Re: \[GEN-OBIT\]/) {
-				# It's a reply to a post, not an actual post
-				# e.g. https://mlarchives.rootsweb.com/listindexes/emails?listname=gen-obit&page=46
-				return 1;
-			} elsif($line =~ /No Results/) {
-				# Last page
-				return 0;
-			}
 		}
-		next unless($stage == 1);
 
 		if($line =~ /<\/p>.+/) {
 			$stage = -1;
