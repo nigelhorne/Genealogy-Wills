@@ -24,7 +24,7 @@ our $VERSION = '0.01';
 
     # See https://freepages.rootsweb.com/~mrawson/genealogy/wills.html
     use Genealogy::Wills;
-    my $info = Genealogy::Wills->new();
+    my $wills = Genealogy::Wills->new();
     # ...
 
 =head1 SUBROUTINES/METHODS
@@ -80,9 +80,13 @@ sub search {
 
 	if(wantarray) {
 		my @wills = @{$self->{'wills'}->selectall_hashref(\%params)};
+		foreach my $will(@wills) {
+			$will->{'url'} = 'https://' . $will->{'url'};
+		}
 		return @wills;
 	}
 	my $will = $self->{'wills'}->fetchrow_hashref(\%params);
+	$will->{'url'} = 'https://' . $will->{'url'};
 	return $will;
 }
 

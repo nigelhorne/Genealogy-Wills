@@ -1,7 +1,7 @@
 #!perl -wT
 
 use strict;
-use Test::Most tests => 11;
+use Test::Most tests => 4;
 
 use lib 'lib';
 use lib 't/lib';
@@ -12,7 +12,7 @@ BEGIN {
 }
 
 SKIP: {
-	skip 'Database not installed', 10 if(!-r 'lib/Genealogy/Wills/database/obituaries.sql');
+	skip 'Database not installed', 3 if(!-r 'lib/Genealogy/Wills/database/wills.sql');
 
 	if($ENV{'TEST_VERBOSE'}) {
 		Genealogy::Wills::DB::init(logger => MyLogger->new());
@@ -26,6 +26,5 @@ SKIP: {
 	}
 
 	ok(scalar(@cowells) >= 1);
-	# FIXME, test either last == Smith or maiden == Smith
-	is($cowells[0]->{'last'}, 'Cowells', 'Returned Cowells');
+	is($cowells[0]->{'last'}, 'Cowell', 'Returned Cowells');
 }

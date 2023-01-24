@@ -147,6 +147,7 @@ sub mrawson($$) {
 		# print __LINE__, ": $page: '$line' ", Data::Dumper->new([split(/;\s?/, $line)])->Dump();
 		# print __LINE__, ": $page: '$line'\n";
 
+		$url =~ s/^https:\/\///;
 		queue("$url/$page", $first, $last, "$town, Kent, England", $year);
 		# print "\"$last\",\"$first\",\"$maiden\",\"$age\",\"$place\",\"$date\",\"$newspaper\"\n" if($last =~ /^[A-Z]/);
 	}
@@ -165,7 +166,13 @@ sub queue($$$$$)
 
 	# print __LINE__, ": $first, $last\n";
 
+	# TODO: combine these into one regex
 	if($last =~ /(.+)\sAlias\s(.+)/) {
+		$last = $1;
+		$columns{'last'} = $2;
+
+		push @queue, \%columns;
+	} elsif($last =~ /(.+)\/(.+)/) {
 		$last = $1;
 		$columns{'last'} = $2;
 
@@ -179,7 +186,6 @@ sub queue($$$$$)
 sub flush($)
 {
 	my $dbh = shift;
-
 	my $query;
 
 	while(my $row = pop @queue) {

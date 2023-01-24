@@ -10,7 +10,7 @@ Version 0.01
 
     # See https://freepages.rootsweb.com/~mrawson/genealogy/wills.html
     use Genealogy::Wills;
-    my $info = Genealogy::Wills->new();
+    my $wills = Genealogy::Wills->new();
     # ...
 
 # SUBROUTINES/METHODS
@@ -23,10 +23,10 @@ Takes an optional argument, directory, that is the directory containing wills.sq
 
 ## search
 
-    my $obits = Genealogy::Wills->new();
+    my $wills = Genealogy::Wills->new();
 
     # Returns an array of hashrefs
-    my @smiths = $obits->search(last => 'Smith');       # You must at least define the last name to search for
+    my @smiths = $wills->search(last => 'Smith');       # You must at least define the last name to search for
 
     print $smiths[0]->{'first'}, "\n";
 
