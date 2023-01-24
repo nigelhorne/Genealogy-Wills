@@ -22,7 +22,7 @@ our $VERSION = '0.01';
 
 =head1 SYNOPSIS
 
-    #  See https://freepages.rootsweb.com/~mrawson/genealogy/wills.html
+    # See https://freepages.rootsweb.com/~mrawson/genealogy/wills.html
     use Genealogy::ObituaryDailyTimes;
     my $info = Genealogy::ObituaryDailyTimes->new();
     # ...
