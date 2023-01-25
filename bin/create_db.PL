@@ -4,8 +4,6 @@
 #
 # -f:	force a build, otherwise it won't build on CPAN smokers or if the
 #	database is less than a day old
-#
-# TODO: handle surnames of A/B e.g. COK/COOKE
 
 use strict;
 use warnings;
@@ -104,14 +102,14 @@ foreach my $page ('ab', 'c', 'dg', 'hj', 'km', 'nr', 'sv', 'wy') {
 
 print ' ' x 78, "\r";
 
-print "\n";
-
 flush($dbh);
 
 $dbh->commit();
 $dbh->prepare('CREATE INDEX name_index ON wills(first, last)')->execute();
 $dbh->do('pragma optimize');
 $dbh->disconnect();
+
+print "\n";
 
 sub mrawson($$) {
 	my $ua = shift;
