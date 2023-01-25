@@ -1,4 +1,7 @@
 Revision history for Genealogy::Wills
 
+0.02
+	Calling new on an object now returns a clone rather than setting the defaults in the new object
+
 0.01	Tue Jan 24 21:00:44 EST 2023
 	First draft
