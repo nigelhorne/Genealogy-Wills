@@ -18,9 +18,9 @@ if($ENV{AUTHOR_TESTING}) {
 	} else {
 		# $Devel::FIXME::REPAIR_INC = 1;
 
-		use_ok('Genealogy::ObituaryDailyTimes');
+		use_ok('Genealogy::Wills');
 
-		# ok($messages[0] !~ /lib\/Genealogy\/ObituaryDailyTimes.pm/);
+		# ok($messages[0] !~ /lib\/Genealogy\/Wills.pm/);
 		ok(scalar(@messages) == 0);
 
 		done_testing(3);
@@ -32,7 +32,7 @@ if($ENV{AUTHOR_TESTING}) {
 sub Devel::FIXME::rules {
 	sub {
 		my $self = shift;
-		return shout($self) if $self->{file} =~ /lib\/Genealogy\/ObituaryDailyTimes/;
+		return shout($self) if $self->{file} =~ /lib\/Genealogy\/Wills/;
 		return Devel::FIXME::DROP();
 	}
 }

@@ -11,7 +11,7 @@ if($ENV{AUTHOR_TESTING}) {
 		plan(skip_all => 'Test::Strict required for testing use strict');
 	} else {
 		all_perl_files_ok();
-		warnings_ok('lib/Genealogy/ObituaryDailyTimes.pm');
+		warnings_ok('lib/Genealogy/Wills.pm');
 	}
 } else {
 	plan(skip_all => 'Author tests not required for installation');

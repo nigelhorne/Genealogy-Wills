@@ -13,7 +13,7 @@ if($ENV{AUTHOR_TESTING}) {
 	} else {
 		my $tps = Test::Pod::Snippets->new();
 
-		my @modules = qw/ Genealogy::ObituaryDailyTimes /;
+		my @modules = qw/ Genealogy::Wills /;
 
 		$tps->runtest(module => $_, testgroup => 1) for @modules;
 

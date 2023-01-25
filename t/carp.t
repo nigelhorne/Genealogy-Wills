@@ -5,7 +5,7 @@ use warnings;
 use Test::Most tests => 5;
 
 BEGIN {
-	use_ok('Genealogy::ObituaryDailyTimes');
+	use_ok('Genealogy::Wills');
 }
 
 CARP: {
@@ -14,7 +14,7 @@ CARP: {
 	if($@) {
 		plan(skip_all => 'Test::Carp needed to check error messages');
 	} else {
-		my $search = new_ok('Genealogy::ObituaryDailyTimes');
+		my $search = new_ok('Genealogy::Wills');
 
 		does_carp_that_matches(sub { my @empty = $search->search(); }, qr/^Value for 'last' is mandatory/);
 		does_carp_that_matches(sub { my @empty = $search->search(last => undef); }, qr/^Value for 'last' is mandatory/);

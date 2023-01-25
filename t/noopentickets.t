@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use Test::Most tests => 1;
-use constant URL =>'https://api.github.com/repos/nigelhorne/Genealogy-ObituaryDailyTimes/issues';
+use constant URL =>'https://api.github.com/repos/nigelhorne/Genealogy-Wills/issues';
 
 # NOBUGS: {
 	# RT system, deprecated
@@ -13,7 +13,7 @@ use constant URL =>'https://api.github.com/repos/nigelhorne/Genealogy-ObituaryDa
 			# if($@) {
 				# diag('WWW::RT::CPAN required to check for open tickets');
 				# skip('WWW::RT::CPAN required to check for open tickets', 3);
-			# } elsif(my @rc = @{WWW::RT::CPAN::list_dist_active_tickets(dist => 'Genealogy-ObituaryDailyTimes')}) {
+			# } elsif(my @rc = @{WWW::RT::CPAN::list_dist_active_tickets(dist => 'Genealogy-Wills')}) {
 				# ok($rc[0] == 200);
 				# ok($rc[1] eq 'OK');
 				# my @tickets = $rc[2] ? @{$rc[2]} : ();
