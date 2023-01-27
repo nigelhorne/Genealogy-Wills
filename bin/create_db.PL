@@ -178,6 +178,17 @@ sub queue($$$$$)
 	}
 
 	$columns{'last'} = $last;
+	
+	# Handle "Ash next Sandwich" by adding both Ash and Sandwich as well
+	if($town =~ /^(.*) next (.*),\s+(.*)/i) {
+		push @queue, \%columns;
+
+		$columns{'town'} = "$1, $3";
+		push @queue, \%columns;
+
+		$columns{'town'} = "$2, $3";
+	}
+
 	push @queue, \%columns;
 }
 
