@@ -155,44 +155,47 @@ sub queue($$$$$)
 {
 	my ($url, $first, $last, $town, $year) = @_;
 
-	my %columns = (
+	my $columns = {
 		url => $url,
 		first => $first,
 		town => $town,
 		year => $year
-	);
+	};
 
 	# print __LINE__, ": $first, $last\n";
 
 	# TODO: combine these into one regex
 	if($last =~ /(.+)\sAlias\s(.+)/) {
 		$last = $1;
-		$columns{'last'} = $2;
+		$columns->{'last'} = $2;
 
-		push @queue, \%columns;
+		push @queue, $columns;
 	} elsif($last =~ /(.+)\/(.+)/) {
 		$last = $1;
-		$columns{'last'} = $2;
+		$columns->{'last'} = $2;
 
-		push @queue, \%columns;
+		push @queue, $columns;
 	}
 
-	$columns{'last'} = $last;
+	$columns->{'last'} = $last;
 	
 	# Handle "Ash next Sandwich" by adding both Ash and Sandwich as well
-	if($town =~ /^(.*) next (.*),\s+(.*)/i) {
-		push @queue, \%columns;
+	if($town =~ /^(.*) next (.*?),\s+(.*)/i) {
+		push @queue, $columns;
 
-		$columns{'town'} = "$1, $3";
-		push @queue, \%columns;
+		$columns = { %{$columns} };	 # Clone as we push refs
+		$columns->{'town'} = "$1, $3";
+		push @queue, $columns;
 
-		$columns{'town'} = "$1, $2, $3";
-		push @queue, \%columns;
+		$columns = { %{$columns} };
+		$columns->{'town'} = "$1, $2, $3";
+		push @queue, $columns;
 
-		$columns{'town'} = "$2, $3";
+		$columns = { %{$columns} };
+		$columns->{'town'} = "$2, $3";
 	}
 
-	push @queue, \%columns;
+	push @queue, $columns;
 }
 
 sub flush($)
