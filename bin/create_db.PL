@@ -166,15 +166,13 @@ sub queue($$$$$)
 
 	# TODO: combine these into one regex
 	if($last =~ /(.+)\sAlias\s(.+)/) {
-		$last = $1;
-		$columns->{'last'} = $2;
+		push @queue, { %{$columns}, last => $1 };
 
-		push @queue, $columns;
+		$last = $2;
 	} elsif($last =~ /(.+)\/(.+)/) {
-		$last = $1;
-		$columns->{'last'} = $2;
+		push @queue, { %{$columns}, last => $1 };
 
-		push @queue, $columns;
+		$last = $2;
 	}
 
 	$columns->{'last'} = $last;
@@ -183,15 +181,10 @@ sub queue($$$$$)
 	if($town =~ /^(.*) next (.*?),\s+(.*)/i) {
 		push @queue, $columns;
 
+		push @queue, { %{$columns}, town => "$1, $3" };
+		push @queue, { %{$columns}, town => "$1, $2, $3" };
+
 		$columns = { %{$columns} };	 # Clone as we push refs
-		$columns->{'town'} = "$1, $3";
-		push @queue, $columns;
-
-		$columns = { %{$columns} };
-		$columns->{'town'} = "$1, $2, $3";
-		push @queue, $columns;
-
-		$columns = { %{$columns} };
 		$columns->{'town'} = "$2, $3";
 	}
 
