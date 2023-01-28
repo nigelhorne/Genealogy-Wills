@@ -186,6 +186,9 @@ sub queue($$$$$)
 		$columns{'town'} = "$1, $3";
 		push @queue, \%columns;
 
+		$columns{'town'} = "$1, $2, $3";
+		push @queue, \%columns;
+
 		$columns{'town'} = "$2, $3";
 	}
 
