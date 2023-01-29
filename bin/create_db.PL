@@ -194,8 +194,29 @@ sub queue($$$$$)
 sub flush($)
 {
 	my $dbh = shift;
-	my $query;
 
+	# Remove duplicates
+	my %seen;
+	my @result;
+
+	foreach my $item(@queue) {
+		my $middle = $item->{'middle'};
+		if(!defined($middle)) {
+			$item->{'middle'} = '';
+		}
+		my $k = join('|', @$item{qw /first middle last town year url/ });
+		if(!defined($middle)) {
+			delete $item->{'middle'};
+		}
+		unless($seen{$k}) {
+			push @result, $item unless $seen{$k};
+			$seen{$k} = 1;
+		} else {
+			# print "$k\n";
+		}
+	}
+
+	my $query;
 	while(my $row = pop @queue) {
 		if(!defined($query)) {
 			$query = 'INSERT INTO wills(first, middle, last, town, year, url) VALUES (';
