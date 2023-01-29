@@ -197,7 +197,7 @@ sub flush($)
 
 	# Remove duplicates
 	my %seen;
-	my @result;
+	my @deduped;
 
 	foreach my $item(@queue) {
 		my $middle = $item->{'middle'};
@@ -209,7 +209,7 @@ sub flush($)
 			delete $item->{'middle'};
 		}
 		unless($seen{$k}) {
-			push @result, $item unless $seen{$k};
+			push @deduped, $item;
 			$seen{$k} = 1;
 		} else {
 			# print "$k\n";
@@ -217,7 +217,7 @@ sub flush($)
 	}
 
 	my $query;
-	while(my $row = pop @queue) {
+	while(my $row = pop @deduped) {
 		if(!defined($query)) {
 			$query = 'INSERT INTO wills(first, middle, last, town, year, url) VALUES (';
 		} else {
