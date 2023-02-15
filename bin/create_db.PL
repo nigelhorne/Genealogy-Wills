@@ -77,7 +77,7 @@ HTTP::Cache::Transparent::init({
 	MaxAge => 30 * 24
 }) || die "$0: $cachedir: $!";
 
-print "This will take some time. It'd be best to go and make yourself a cup of tea.\n";
+# print "This will take some time. It'd be best to go and make yourself a cup of tea.\n";
 
 my $ua = LWP::UserAgent::WithCache->new(timeout => 10, keep_alive => 1);
 $ua->env_proxy(1);
@@ -176,7 +176,7 @@ sub queue($$$$$)
 	}
 
 	$columns->{'last'} = $last;
-	
+
 	# Handle "Ash next Sandwich" by adding both Ash and Sandwich as well
 	if($town =~ /^(.*) next (.*?),\s+(.*)/i) {
 		push @queue, $columns;
