@@ -9,7 +9,9 @@ BEGIN {
 }
 
 require_ok('Genealogy::Wills') || print 'Bail out!';
-if(!-r 'lib/Genealogy/Wills/database/wills.sql') {
+
+# Smoker testing can do sanity checking without building the database
+if((!$ENV{'AUTOMATED_TESTING'}) && (!-r 'lib/Genealogy/Wills/database/wills.sql')) {
 	diag('Database not installed');
 	print 'Bail out!';
 }
