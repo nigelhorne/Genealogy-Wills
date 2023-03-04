@@ -53,7 +53,6 @@ sub new {
 		return bless { %{$class}, %args }, ref($class);
 	}
 
-
 	my $directory = $args{'directory'} || Module::Info->new_from_loaded(__PACKAGE__)->file();
 	$directory =~ s/\.pm$//;
 
