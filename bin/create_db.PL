@@ -145,7 +145,7 @@ sub mrawson($$) {
 		# print __LINE__, ": $page: '$line' ", Data::Dumper->new([split(/;\s?/, $line)])->Dump();
 		# print __LINE__, ": $page: '$line'\n";
 
-		queue("https://freepages.rootsweb.com/~mrawson/genealogy/$page", $first, $last, "$town, Kent, England", $year);
+		queue("freepages.rootsweb.com/~mrawson/genealogy/$page", $first, $last, "$town, Kent, England", $year);
 		# print "https://freepages.rootsweb.com/~mrawson/genealogy/$page\n";
 		# print "\"$last\",\"$first\",\"$maiden\",\"$age\",\"$place\",\"$date\",\"$newspaper\"\n" if($last =~ /^[A-Z]/);
 	}
