@@ -127,10 +127,6 @@ L<https://metacpan.org/release/Genealogy-Wills>
 
 L<https://rt.cpan.org/NoAuth/Bugs.html?Dist=Genealogy-Wills>
 
-=item * CPANTS
-
-L<http://cpants.cpanauthors.org/dist/Genealogy-Wills>
-
 =item * CPAN Testers' Matrix
 
 L<http://matrix.cpantesters.org/?dist=Genealogy-Wills>
