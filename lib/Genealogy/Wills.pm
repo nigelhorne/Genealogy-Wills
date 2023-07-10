@@ -33,7 +33,9 @@ our $VERSION = '0.02';
 
 Creates a Genealogy::Wills object.
 
-Takes an optional argument, directory, that is the directory containing wills.sql.
+Takes two optionals arguments:
+	directory: that is the directory containing obituaries.sql
+	logger: an object to send log messages to
 
 =cut
 
