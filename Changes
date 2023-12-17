@@ -1,5 +1,8 @@
 Revision history for Genealogy::Wills
 
+0.04
+	Added first, last, year as an index
+
 0.03	Sun Oct 15 16:48:19 EDT 2023
 	Latest DB.pm from NJH-Snippets
 

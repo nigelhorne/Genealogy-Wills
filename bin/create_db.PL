@@ -108,6 +108,7 @@ flush($dbh);
 
 $dbh->commit();
 $dbh->prepare('CREATE INDEX name_index ON wills(first, last)')->execute();
+$dbh->prepare('CREATE INDEX name_index_year ON wills(first, last, year)')->execute();
 $dbh->do('pragma optimize');
 $dbh->disconnect();
 
