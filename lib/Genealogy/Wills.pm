@@ -94,7 +94,7 @@ sub search {
 		return;
 	}
 
-	$self->{'wills'} ||= Genealogy::Wills::wills->new(no_entry => 1);
+	$self->{'wills'} ||= Genealogy::Wills::wills->new(no_entry => 1, %{$self});
 
 	if(!defined($self->{'wills'})) {
 		Carp::croak("Can't open the wills database");
