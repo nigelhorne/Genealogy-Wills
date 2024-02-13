@@ -9,7 +9,7 @@ BEGIN {
 	use_ok('Genealogy::Wills');
 }
 
-CARP: {
+SKIP: {
 	skip 'Database not installed', 4 if(!-r 'lib/Genealogy/Wills/data/wills.sql');
 
 	Test::Carp->import();
