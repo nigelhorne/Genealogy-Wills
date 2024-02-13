@@ -48,7 +48,7 @@ if(!-d $dir) {
 	mkdir $dir, 0755;
 }
 
-$dir = "$dir/database";
+$dir = "$dir/data";
 my $filename = File::Spec->catdir($dir, 'wills.sql');
 my %normalised;
 
