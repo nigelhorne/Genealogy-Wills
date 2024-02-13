@@ -5,7 +5,7 @@ use strict;
 use Carp;
 use File::Spec;
 use Module::Info;
-use Genealogy::Wills::Databases::wills;
+use Genealogy::Wills::wills;
 
 =head1 NAME
 
@@ -94,7 +94,7 @@ sub search {
 		return;
 	}
 
-	$self->{'wills'} ||= Genealogy::Wills::Databases::wills->new(no_entry => 1);
+	$self->{'wills'} ||= Genealogy::Wills::wills->new(no_entry => 1);
 
 	if(!defined($self->{'wills'})) {
 		Carp::croak("Can't open the wills database");

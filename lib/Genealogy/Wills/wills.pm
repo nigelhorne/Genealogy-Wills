@@ -1,4 +1,4 @@
-package Genealogy::Wills::Databases::wills;
+package Genealogy::Wills::wills;
 
 use strict;
 use warnings;
@@ -6,7 +6,7 @@ use Database::Abstraction;
 
 =head1 NAME
 
-Genealogy::Wills::Databases::wills
+Genealogy::Wills::wills
 
 =head1 VERSION
 

@@ -17,7 +17,7 @@ SKIP: {
 	Database::Abstraction::init('directory' => 'lib/Genealogy/Wills/data');
 	if($ENV{'TEST_VERBOSE'}) {
 		use Data::Dumper;
-		Genealogy::Wills::Databases::init(logger => MyLogger->new());
+		Database::Abstraction::init(logger => MyLogger->new());
 	}
 	my $search = new_ok('Genealogy::Wills');
 
