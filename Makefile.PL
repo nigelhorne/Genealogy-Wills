@@ -46,9 +46,10 @@ WriteMakefile(
 	TEST_REQUIRES => {
 		'Test::Carp' => 0,
 		'Test::Most' => 0,
+		'Test::Needs' => 0,
 		'Test::NoWarnings' => 0,
 		# 'Test::Kwalitee' => 0,
-		'IPC::System::Simple' => 0,
+		'IPC::System::Simple' => 0
 	}, PREREQ_PM => $prereqs,
 	dist => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
 	clean => { FILES => 'Genealogy-Wills-*' },
