@@ -37,18 +37,18 @@ BEGIN {
 }
 
 my $force_flag;
+my $dir = 'lib/Genealogy/Wills/data';
+
 if(defined($ARGV[0]) && ($ARGV[0] eq '-f')) {
 	$force_flag++;
 } elsif($ENV{'AUTOMATED_TESTING'}) {
 	exit;
 }
 
-my $dir = 'lib/Genealogy/Wills';
 if(!-d $dir) {
 	mkdir $dir, 0755;
 }
 
-$dir = "$dir/data";
 my $filename = File::Spec->catdir($dir, 'wills.sql');
 my %normalised;
 

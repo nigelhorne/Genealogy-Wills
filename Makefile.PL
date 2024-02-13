@@ -4,6 +4,22 @@ use strict;
 use warnings;
 use ExtUtils::MakeMaker 6.64;	# 6.64 for TEST_REQUIRES
 
+my @dirs = (
+	'lib/Genealogy/Wills/data'
+);
+
+# FIXME: AUTOMATED_TESTING - create the empty directory in blib
+foreach my $dir(@dirs) {
+	if(! -d $dir) {
+		print "Creating the download directory $dir\n";
+		mkdir $dir, 0755 || die "$dir: $@";
+		if($ENV{'AUTOMATED_TESTING'}) {
+			# So that the directory is copied to blib for testing
+			open(my $dummy, '>', "$dir/dummy");
+		}
+	}
+}
+
 my $prereqs = {
 	'autodie' => 0,
 	'Carp' => 0,
@@ -54,6 +70,9 @@ WriteMakefile(
 	}, PREREQ_PM => $prereqs,
 	dist => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
 	clean => { FILES => 'Genealogy-Wills-*' },
+	realclean => {
+		FILES => 'Genealogy-Wills-* lib/Genealogy/Wills/data'
+	},
 	# META_ADD => {
 		# provides => {}
 	# },
