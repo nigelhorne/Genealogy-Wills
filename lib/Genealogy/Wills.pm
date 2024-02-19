@@ -13,11 +13,11 @@ Genealogy::Wills - Lookup in a database of wills
 
 =head1 VERSION
 
-Version 0.03
+Version 0.04
 
 =cut
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 =head1 SYNOPSIS
 
@@ -151,7 +151,7 @@ L<http://deps.cpantesters.org/?module=Genealogy::Wills>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2024 Nigel Horne.
+Copyright 2023-2024 Nigel Horne.
 
 This program is released under the following licence: GPL2
 
