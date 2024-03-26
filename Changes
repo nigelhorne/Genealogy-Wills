@@ -1,5 +1,8 @@
 Revision history for Genealogy::Wills
 
+0.05
+	Use CACHE_DIR instead of CACHEDIR
+
 0.04	Sun Feb 18 22:25:31 EST 2024
 	Added first, last, year as an index
 	Use Database::Abstraction
