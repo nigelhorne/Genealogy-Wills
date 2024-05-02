@@ -2,6 +2,8 @@ Revision history for Genealogy::Wills
 
 0.05
 	Use CACHE_DIR instead of CACHEDIR
+	Handle broken smokers
+		https://www.cpantesters.org/cpan/report/8a8d8920-f24c-11ee-b45f-18f16d8775ea
 
 0.04	Sun Feb 18 22:25:31 EST 2024
 	Added first, last, year as an index
