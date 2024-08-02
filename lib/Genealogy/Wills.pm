@@ -85,10 +85,9 @@ sub new {
 
 sub search {
 	my $self = shift;
+	my $params = $self->_get_params('last', @_);
 
-	my %params = (ref($_[0]) eq 'HASH') ? %{$_[0]} : @_;
-
-	if(!defined($params{'last'})) {
+	if(!defined($params->{'last'})) {
 		Carp::carp("Value for 'last' is mandatory");
 		return;
 	}
@@ -100,15 +99,47 @@ sub search {
 	}
 
 	if(wantarray) {
-		my @wills = @{$self->{'wills'}->selectall_hashref(\%params)};
+		my @wills = @{$self->{'wills'}->selectall_hashref($params)};
 		foreach my $will(@wills) {
 			$will->{'url'} = 'https://' . $will->{'url'};
 		}
 		return @wills;
 	}
-	my $will = $self->{'wills'}->fetchrow_hashref(\%params);
+	my $will = $self->{'wills'}->fetchrow_hashref($params);
 	$will->{'url'} = 'https://' . $will->{'url'};
 	return $will;
+}
+
+# Helper routine to parse the arguments given to a function,
+#	allowing the caller to call the function in anyway that they want
+#	e.g. foo('bar'), foo(arg => 'bar'), foo({ arg => 'bar' }) all mean the same
+#	when called _get_params('arg', @_);
+sub _get_params
+{
+	my $self = shift;
+	my $default = shift;
+
+	my %rc;
+
+	if(ref($_[0]) eq 'HASH') {
+		%rc = %{$_[0]};
+	} elsif(scalar(@_) % 2 == 0) {
+		%rc = @_;
+	} elsif(scalar(@_) == 1) {
+		if(defined($default)) {
+			$rc{$default} = shift;
+		} else {
+			my @c = caller(1);
+			my $func = $c[3];	# calling function name
+			Carp::croak('Usage: ', __PACKAGE__, "->$func($default => " . '$val)');
+		}
+	} elsif((scalar(@_) == 0) && defined($default)) {
+		my @c = caller(1);
+		my $func = $c[3];	# calling function name
+		Carp::croak('Usage: ', __PACKAGE__, "->$func($default => " . '$val)');
+	}
+
+	return \%rc;
 }
 
 =head1 AUTHOR

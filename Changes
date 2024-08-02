@@ -1,5 +1,8 @@
 Revision history for Genealogy::Wills
 
+0.06
+	search() can now just take one parameter which is the last name
+
 0.05	Wed Jul  3 07:27:20 EDT 2024
 	Use CACHE_DIR instead of CACHEDIR
 	Handle broken smokers

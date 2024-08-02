@@ -21,7 +21,7 @@ SKIP: {
 	}
 	my $search = new_ok('Genealogy::Wills');
 
-	my @cowells = $search->search(last => 'Cowell');
+	my @cowells = $search->search('Cowell');
 
 	if($ENV{'TEST_VERBOSE'}) {
 		diag(Data::Dumper->new([\@cowells])->Dump());
@@ -30,7 +30,7 @@ SKIP: {
 	ok(scalar(@cowells) >= 1);
 	is($cowells[0]->{'last'}, 'Cowell', 'Returned Cowells');
 
-	my @carltons = $search->search(first => 'Stephen', last => 'Carlton', town => 'Ash, Kent, England');
+	my @carltons = $search->search({ first => 'Stephen', last => 'Carlton', town => 'Ash, Kent, England' });
 	cmp_ok(scalar(@carltons), '==', 1, 'Stephen Carlton, Ash, Kent, England');
 
 	@carltons = $search->search(first => 'Stephen', last => 'Carlton');
