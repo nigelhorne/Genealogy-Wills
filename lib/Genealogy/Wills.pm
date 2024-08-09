@@ -38,8 +38,10 @@ Takes two optional arguments:
 
 =cut
 
-sub new {
-	my $class = shift;
+sub new
+{
+	my $proto = shift;
+	my $class = ref($proto) || $proto;
 	my %args = (ref($_[0]) eq 'HASH') ? %{$_[0]} : @_;
 
 	if(!defined($class)) {
@@ -119,11 +121,14 @@ sub _get_params
 	my $self = shift;
 	my $default = shift;
 
+	if(ref($_[0]) eq 'HASH') {
+		# %rc = %{$_[0]};
+		return $_[0];
+	}
+
 	my %rc;
 
-	if(ref($_[0]) eq 'HASH') {
-		%rc = %{$_[0]};
-	} elsif(scalar(@_) % 2 == 0) {
+	if(scalar(@_) % 2 == 0) {
 		%rc = @_;
 	} elsif(scalar(@_) == 1) {
 		if(defined($default)) {
@@ -131,7 +136,7 @@ sub _get_params
 		} else {
 			my @c = caller(1);
 			my $func = $c[3];	# calling function name
-			Carp::croak('Usage: ', __PACKAGE__, "->$func($default => " . '$val)');
+			Carp::croak('Usage: ', __PACKAGE__, "->$func()");
 		}
 	} elsif((scalar(@_) == 0) && defined($default)) {
 		my @c = caller(1);
