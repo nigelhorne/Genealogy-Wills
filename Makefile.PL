@@ -55,6 +55,15 @@ unless(defined($ENV{'AUTOMATED_TESTING'})) {
 	$prereqs->{'Try::Tiny'} = 0;
 }
 
+my $dist = {
+	COMPRESS => 'gzip -9f',
+	SUFFIX => 'gz'
+};
+
+if($^O eq 'darwin') {
+	$dist->{'TAR'} = 'gtar';
+}
+
 WriteMakefile(
 	NAME		=> 'Genealogy::Wills',
 	AUTHOR		=> q{Nigel Horne <njh@bandsman.co.uk>},
@@ -70,13 +79,14 @@ WriteMakefile(
 	PL_FILES => (defined($ENV{'AUTOMATED_TESTING'}) ? {} : {'bin/create_db.PL' => 'bin/create_db'}),
 	TEST_REQUIRES => {
 		'Test::Carp' => 0,
+		'Test::DescribeMe' => 0,
 		'Test::Most' => 0,
 		'Test::Needs' => 0,
 		'Test::NoWarnings' => 0,
 		# 'Test::Kwalitee' => 0,
 		'IPC::System::Simple' => 0
 	}, PREREQ_PM => $prereqs,
-	dist => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
+	dist => $dist,
 	clean => { FILES => 'Genealogy-Wills-*' },
 	realclean => {
 		FILES => 'Genealogy-Wills-* lib/Genealogy/Wills/data'
