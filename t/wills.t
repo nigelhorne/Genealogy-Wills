@@ -13,7 +13,7 @@ BEGIN {
 }
 
 SKIP: {
-	skip('Database not installed', 6) if(!-r 'lib/Genealogy/Wills/data/wills.sql');
+	skip('Database not installed', 5) if(!-r 'lib/Genealogy/Wills/data/wills.sql');
 
 	Database::Abstraction::init('directory' => 'lib/Genealogy/Wills/data');
 	if($ENV{'TEST_VERBOSE'}) {
