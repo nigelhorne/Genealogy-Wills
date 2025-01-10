@@ -20,8 +20,14 @@ Version 0.05
 Creates a Genealogy::Wills object.
 
 Takes two optional arguments:
-	directory: that is the directory containing obituaries.sql
-	logger: an object to send log messages to
+
+- `directory`
+
+    That is the directory containing obituaries.sql
+
+- `logger`
+
+    An object to send log messages to
 
 ## search
 
@@ -68,6 +74,6 @@ You can also look for information at:
 
 # LICENSE AND COPYRIGHT
 
-Copyright 2023-2024 Nigel Horne.
+Copyright 2023-2025 Nigel Horne.
 
 This program is released under the following licence: GPL2

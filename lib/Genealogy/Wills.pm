@@ -35,8 +35,18 @@ our $VERSION = '0.05';
 Creates a Genealogy::Wills object.
 
 Takes two optional arguments:
-	directory: that is the directory containing obituaries.sql
-	logger: an object to send log messages to
+
+=over 4
+
+=item C<directory>
+
+That is the directory containing obituaries.sql
+
+=item C<logger>
+
+An object to send log messages to
+
+=back
 
 =cut
 
@@ -200,7 +210,7 @@ L<http://deps.cpantesters.org/?module=Genealogy::Wills>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2023-2024 Nigel Horne.
+Copyright 2023-2025 Nigel Horne.
 
 This program is released under the following licence: GPL2
 
