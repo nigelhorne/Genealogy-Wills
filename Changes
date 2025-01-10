@@ -4,6 +4,7 @@ Revision history for Genealogy::Wills
 	search() can now just take one parameter which is the last name
 	More handling of broken smokers
 		http://cpantesters.org/report/0c13a6c2-4618-11ef-958e-8f2e6e8775ea
+	Added t/30-basics.t
 
 0.05	Wed Jul  3 07:27:20 EDT 2024
 	Use CACHE_DIR instead of CACHEDIR

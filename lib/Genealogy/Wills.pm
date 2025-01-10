@@ -34,13 +34,14 @@ our $VERSION = '0.05';
 
 Creates a Genealogy::Wills object.
 
-Takes two optional arguments:
+Takes two optional arguments which can be hash, hash-ref or key-value pairs.
 
 =over 4
 
 =item C<directory>
 
-That is the directory containing obituaries.sql
+That is the directory containing obituaries.sql.
+If not given, the use the module's data directory.
 
 =item C<logger>
 
@@ -98,6 +99,13 @@ sub new
 }
 
 =head2 search
+
+Last (last name) is a mandatory parameter.
+
+Return a list of hash references in list context,
+or a hash reference in scalar context.
+
+Each record includes a formatted C<url> field.
 
     my $wills = Genealogy::Wills->new();
 
