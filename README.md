@@ -4,7 +4,7 @@ Genealogy::Wills - Lookup in a database of wills
 
 # VERSION
 
-Version 0.05
+Version 0.06
 
 # SYNOPSIS
 
@@ -19,17 +19,25 @@ Version 0.05
 
 Creates a Genealogy::Wills object.
 
-Takes two optional arguments:
+Takes two optional arguments which can be hash, hash-ref or key-value pairs.
 
 - `directory`
 
-    That is the directory containing obituaries.sql
+    That is the directory containing obituaries.sql.
+    If not given, the use the module's data directory.
 
 - `logger`
 
     An object to send log messages to
 
 ## search
+
+Last (last name) is a mandatory parameter.
+
+Return a list of hash references in list context,
+or a hash reference in scalar context.
+
+Each record includes a formatted `url` field.
 
     my $wills = Genealogy::Wills->new();
 

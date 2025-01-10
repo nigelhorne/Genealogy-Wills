@@ -1,6 +1,6 @@
 Revision history for Genealogy::Wills
 
-0.06
+0.06	Fri Jan 10 16:10:24 EST 2025
 	search() can now just take one parameter which is the last name
 	More handling of broken smokers
 		http://cpantesters.org/report/0c13a6c2-4618-11ef-958e-8f2e6e8775ea
