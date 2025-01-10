@@ -57,12 +57,12 @@ sub new
 
 	# Handle hash or hashref arguments
 	my %args;
-	if((@_ == 1) && (ref $_[0] eq 'HASH')) {
+	if((@_ == 1) && (ref($_[0]) eq 'HASH')) {
 		%args = %{$_[0]};
 	} elsif((@_ % 2) == 0) {
 		%args = @_;
 	} else {
-		carp(__PACKAGE__, ': Invalid arguments passed to new()');
+		Carp::croak(__PACKAGE__, ': Invalid arguments passed to new()');
 		return;
 	}
 
