@@ -13,7 +13,7 @@ require_ok('Genealogy::Wills') || print 'Bail out!';
 if(my $reporter = $ENV{'PERL_CPAN_REPORTER_CONFIG'}) {
 	# https://www.cpantesters.org/cpan/report/ef9905ca-3a1c-11ef-a8e6-11166e8775ea
 	if($reporter =~ /smoker/i) {
-		warn 'AUTOMATED_TESTING added for you';
+		diag('AUTOMATED_TESTING added for you');
 		$ENV{'AUTOMATED_TESTING'} = 1;
 	}
 }

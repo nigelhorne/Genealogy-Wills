@@ -5,6 +5,8 @@ use strict;
 use Carp;
 use File::Spec;
 use Module::Info;
+use Scalar::Util;
+
 use Genealogy::Wills::wills;
 
 =head1 NAME
@@ -40,18 +42,29 @@ Takes two optional arguments:
 
 sub new
 {
-	my $proto = shift;
-	my $class = ref($proto) || $proto;
-	my %args = (ref($_[0]) eq 'HASH') ? %{$_[0]} : @_;
+	my $class = shift;
+
+	# Handle hash or hashref arguments
+	my %args;
+	if((@_ == 1) && (ref $_[0] eq 'HASH')) {
+		%args = %{$_[0]};
+	} elsif((@_ % 2) == 0) {
+		%args = @_;
+	} else {
+		carp(__PACKAGE__, ': Invalid arguments passed to new()');
+		return;
+	}
 
 	if(!defined($class)) {
-		# Using Genealogy::Wills->new(), not Genealogy::Wills::new()
-		# carp(__PACKAGE__, ' use ->new() not ::new() to instantiate');
-		# return;
+		if((scalar keys %args) > 0) {
+			# Using Genealogy::Wills::new(), not Genealogy::Wills->new()
+			carp(__PACKAGE__, ' use ->new() not ::new() to instantiate');
+			return;
+		}
 
 		# FIXME: this only works when no arguments are given
 		$class = __PACKAGE__;
-	} elsif(ref($class)) {
+	} elsif(Scalar::Util::blessed($class)) {
 		# clone the given object
 		return bless { %{$class}, %args }, ref($class);
 	}
@@ -112,36 +125,36 @@ sub search {
 	return $will;
 }
 
-# Helper routine to parse the arguments given to a function,
+# Helper routine to parse the arguments given to a function.
+# Processes arguments passed to methods and ensures they are in a usable format,
 #	allowing the caller to call the function in anyway that they want
 #	e.g. foo('bar'), foo(arg => 'bar'), foo({ arg => 'bar' }) all mean the same
 #	when called _get_params('arg', @_);
 sub _get_params
 {
-	my $self = shift;
+	shift;  # Discard the first argument (typically $self)
 	my $default = shift;
 
-	if(ref($_[0]) eq 'HASH') {
-		# %rc = %{$_[0]};
-		return $_[0];
-	}
+	# Directly return hash reference if the first parameter is a hash reference
+	return $_[0] if(ref $_[0] eq 'HASH');
 
 	my %rc;
+	my $num_args = scalar @_;
 
-	if((scalar(@_) % 2) == 0) {
+	# Populate %rc based on the number and type of arguments
+	if(($num_args == 1) && (defined $default)) {
+		# %rc = ($default => shift);
+		return { $default => shift };
+	} elsif($num_args == 1) {
+		Carp::croak('Usage: ', __PACKAGE__, '->', (caller(1))[3], '()');
+	} elsif(($num_args == 0) && (defined($default))) {
+		Carp::croak('Usage: ', __PACKAGE__, '->', (caller(1))[3], "($default => \$val)");
+	} elsif(($num_args % 2) == 0) {
 		%rc = @_;
-	} elsif(scalar(@_) == 1) {
-		if(defined($default)) {
-			$rc{$default} = shift;
-		} else {
-			my @c = caller(1);
-			my $func = $c[3];	# calling function name
-			Carp::croak('Usage: ', __PACKAGE__, "->$func()");
-		}
-	} elsif((scalar(@_) == 0) && defined($default)) {
-		my @c = caller(1);
-		my $func = $c[3];	# calling function name
-		Carp::croak('Usage: ', __PACKAGE__, "->$func($default => " . '$val)');
+	} elsif($num_args == 0) {
+		return;
+	} else {
+		Carp::croak('Usage: ', __PACKAGE__, '->', (caller(1))[3], '()');
 	}
 
 	return \%rc;

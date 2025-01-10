@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use ExtUtils::MakeMaker 6.64;	# 6.64 for TEST_REQUIRES
+use ExtUtils::MakeMaker;
 
 # Test for broken smokers that don't set AUTOMATED_TESTING
 if(my $reporter = $ENV{'PERL_CPAN_REPORTER_CONFIG'}) {
@@ -35,12 +35,14 @@ my $prereqs = {
 	'DBD::SQLite' => 0,
 	'DBD::SQLite::Constants' => 0,
 	'Error::Simple' => 0,
+	'ExtUtils::MakeMaker' => 6.64,	# 6.64 for TEST_REQUIRES
 	'File::Basename' => 0,
 	'File::pfopen' => 0,
 	'File::Slurp' => 0,
 	'File::Spec' => 0,
 	'File::Temp' => 0,
-	'Module::Info' => 0
+	'Module::Info' => 0,
+	'Scalar::Util' => 0
 };
 
 unless(defined($ENV{'AUTOMATED_TESTING'})) {
