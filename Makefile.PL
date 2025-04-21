@@ -31,6 +31,7 @@ foreach my $dir(@dirs) {
 my $prereqs = {
 	'autodie' => 0,
 	'Carp' => 0,
+	'Config::Abstraction' => 0,
 	'Data::Reuse' => 0,
 	'Database::Abstraction' => 0.04,
 	'DBD::SQLite' => 0,
@@ -43,6 +44,7 @@ my $prereqs = {
 	'File::Spec' => 0,
 	'File::Temp' => 0,
 	'Module::Info' => 0,
+	'Params::Get' => 0,
 	'Scalar::Util' => 0
 };
 
@@ -82,13 +84,15 @@ WriteMakefile(
 	'INC' => '',	# e.g., '-I/usr/include/other'
 	PL_FILES => (defined($ENV{'AUTOMATED_TESTING'}) ? {} : {'bin/create_db.PL' => 'bin/create_db'}),
 	TEST_REQUIRES => {
+		'File::Temp' => 0,
 		'Test::Carp' => 0,
 		'Test::DescribeMe' => 0,
 		'Test::Most' => 0,
 		'Test::Needs' => 0,
 		'Test::Warnings' => 0,
 		# 'Test::Kwalitee' => 0,
-		'IPC::System::Simple' => 0
+		'IPC::System::Simple' => 0,
+		'YAML::XS' => 0
 	}, PREREQ_PM => $prereqs,
 	dist => $dist,
 	clean => { FILES => 'Genealogy-Wills-*' },

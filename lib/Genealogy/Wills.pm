@@ -3,9 +3,11 @@ package Genealogy::Wills;
 use warnings;
 use strict;
 use Carp;
+use Config::Abstraction;
 use Data::Reuse;
 use File::Spec;
 use Module::Info;
+use Params::Get;
 use Scalar::Util;
 
 use Genealogy::Wills::wills;
@@ -35,16 +37,24 @@ our $VERSION = '0.07';
 
 Creates a Genealogy::Wills object.
 
-Takes two optional arguments which can be hash, hash-ref or key-value pairs.
+Takes three optional arguments,
+which can be hash, hash-ref or key-value pairs.
 
 =over 4
 
-=item C<directory>
+=item * C<config_file>
+
+Points to a configuration file which contains the parameters to C<new()>.
+The file can be in any common format,
+including C<YAML>, C<XML>, and C<INI>.
+This allows the parameters to be set at run time.
+
+=item * C<directory>
 
 That is the directory containing obituaries.sql.
 If not given, the use the module's data directory.
 
-=item C<logger>
+=item * C<logger>
 
 An object to send log messages to
 
@@ -57,18 +67,10 @@ sub new
 	my $class = shift;
 
 	# Handle hash or hashref arguments
-	my %args;
-	if((@_ == 1) && (ref($_[0]) eq 'HASH')) {
-		%args = %{$_[0]};
-	} elsif((@_ % 2) == 0) {
-		%args = @_;
-	} else {
-		Carp::croak(__PACKAGE__, ': Invalid arguments passed to new()');
-		return;
-	}
+	my $params = Params::Get::get_params(undef, @_);
 
 	if(!defined($class)) {
-		if((scalar keys %args) > 0) {
+		if((scalar keys %{$params}) > 0) {
 			# Using Genealogy::Wills::new(), not Genealogy::Wills->new()
 			carp(__PACKAGE__, ' use ->new() not ::new() to instantiate');
 			return;
@@ -78,24 +80,36 @@ sub new
 		$class = __PACKAGE__;
 	} elsif(Scalar::Util::blessed($class)) {
 		# clone the given object
-		return bless { %{$class}, %args }, ref($class);
+		if($params) {
+			return bless { %{$class}, %{$params} }, ref($class);
+		}
+		return bless $class, ref($class);
 	}
 
-	if(!defined((my $directory = ($args{'directory'} || $Database::Abstraction->{'directory'})))) {
+	# Load the configuration from a config file, if provided
+	if(exists($params->{'config_file'}) && (my $config = Config::Abstraction->new(config_dirs => ['/'], config_file => $params->{'config_file'}, env_prefix => lc($class) . '_')->all())) {
+		# my $config = YAML::XS::LoadFile($params->{'config_file'});
+		if($config->{$class}) {
+			$config = $config->{$class};
+		}
+		$params = { %{$config}, %{$params} };
+	}
+
+	if(!defined((my $directory = ($params->{'directory'} || $Database::Abstraction->{'directory'})))) {
 		# If the directory argument isn't given, see if we can find the data
 		$directory ||= Module::Info->new_from_loaded(__PACKAGE__)->file();
 		$directory =~ s/\.pm$//;
-		$args{'directory'} = File::Spec->catfile($directory, 'data');
+		$params->{'directory'} = File::Spec->catfile($directory, 'data');
 	}
-	if(!-d $args{'directory'}) {
-		Carp::carp(__PACKAGE__, ': ', $args{'directory'}, ' is not a directory');
+	if(!-d $params->{'directory'}) {
+		Carp::carp(__PACKAGE__, ': ', $params->{'directory'}, ' is not a directory');
 		return;
 	}
 
 	# cache_duration can be overriden by the args
 	return bless {
 		cache_duration => '1 day',	# The database is updated daily
-		%args,
+		%{$params}
 	}, $class;
 }
 
