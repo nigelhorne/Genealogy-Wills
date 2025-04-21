@@ -60,8 +60,7 @@ DumpFile($nofield_file, {
 });
 $obj = Genealogy::Wills->new(config_file => $nofield_file);
 ok($obj, 'Object created with config that lacks class key');
-diag($obj->{directory});
-like($obj->{directory}, qr/lib.Genealogy.Wills.data$/, 'Falls back to passed args if class key missing (uses directory directly)');
+like($obj->{directory}, qr/lib.Genealogy.Wills.data$/, 'Falls back to default if class key missing (uses directory directly)');
 
 # Directory in config file does not exist
 my $bad_dir_file = File::Spec->catdir($tempdir, 'baddir.yml');
