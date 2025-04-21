@@ -30,7 +30,7 @@ isa_ok($obj, 'Genealogy::Wills');
 is($obj->{directory}, $fake_directory, 'Directory was read from config file');
 
 subtest 'Environment test' => sub {
-	local $ENV{'Genealogy::Wills_DIRECTORY'} = '/';
+	local $ENV{'Genealogy::Wills::directory'} = '/';
 
 	$obj = Genealogy::Wills->new(config_file => $config_file);
 
