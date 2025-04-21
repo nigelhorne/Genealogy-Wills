@@ -30,4 +30,12 @@ ok($obj, 'Object was created successfully');
 isa_ok($obj, 'Genealogy::Wills');
 is($obj->{directory}, $fake_directory, 'Directory was read from config file');
 
+local $ENV{'Genealogy::Wills_DIRECTORY'} = '/';
+
+$obj = Genealogy::Wills->new(config_file => $config_file);
+
+ok($obj, 'Object was created successfully');
+isa_ok($obj, 'Genealogy::Wills');
+is($obj->{directory}, '/', 'Read config directory from the environment');
+
 done_testing();
