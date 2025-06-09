@@ -31,7 +31,6 @@ foreach my $dir(@dirs) {
 my $prereqs = {
 	'autodie' => 0,
 	'Carp' => 0,
-	'Config::Abstraction' => 0,
 	'Data::Reuse' => 0,
 	'Database::Abstraction' => 0.04,
 	'DBD::SQLite' => 0,
@@ -44,6 +43,7 @@ my $prereqs = {
 	'File::Spec' => 0,
 	'File::Temp' => 0,
 	'Module::Info' => 0,
+	'Object::Configure' => 0,
 	'Params::Get' => 0,
 	'Scalar::Util' => 0
 };

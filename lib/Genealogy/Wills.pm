@@ -3,10 +3,10 @@ package Genealogy::Wills;
 use warnings;
 use strict;
 use Carp;
-use Config::Abstraction;
 use Data::Reuse;
 use File::Spec;
 use Module::Info;
+use Object::Configure;
 use Params::Get;
 use Scalar::Util;
 
@@ -87,13 +87,7 @@ sub new
 	}
 
 	# Load the configuration from a config file, if provided
-	if(exists($params->{'config_file'}) && (my $config = Config::Abstraction->new(config_dirs => ['/'], config_file => $params->{'config_file'}, env_prefix => "${class}::")->all())) {
-		# my $config = YAML::XS::LoadFile($params->{'config_file'});
-		if($config->{$class}) {
-			$config = $config->{$class};
-		}
-		$params = { %{$config}, %{$params} };
-	}
+	$params = Object::Configure::configure($class, $params);
 
 	if(!defined((my $directory = ($params->{'directory'} || $Database::Abstraction->{'directory'})))) {
 		# If the directory argument isn't given, see if we can find the data
