@@ -43,7 +43,7 @@ my $prereqs = {
 	'File::Spec' => 0,
 	'File::Temp' => 0,
 	'Module::Info' => 0,
-	'Object::Configure' => 0,
+	'Object::Configure' => 0.10,
 	'Params::Get' => 0,
 	'Scalar::Util' => 0
 };

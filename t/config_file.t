@@ -16,7 +16,7 @@ my $config_file = File::Spec->catdir($tempdir, 'config.yml');
 
 # Write a fake config with a directory that exists
 my $fake_directory = $tempdir; # just use the tempdir itself
-my $class_name = 'Genealogy::Wills';
+my $class_name = 'Genealogy__Wills';
 
 DumpFile($config_file, {
 	$class_name => { directory => $fake_directory }
@@ -30,7 +30,7 @@ isa_ok($obj, 'Genealogy::Wills');
 is($obj->{directory}, $fake_directory, 'Directory was read from config file');
 
 subtest 'Environment test' => sub {
-	local $ENV{'Genealogy::Wills::directory'} = '/';
+	local $ENV{'Genealogy__Wills__directory'} = '/';
 
 	$obj = Genealogy::Wills->new(config_file => $config_file);
 
