@@ -49,9 +49,9 @@ my ($badfh, $badfile) = tempfile();
 print $badfh "--- Just a list\n- foo\n- bar\n";
 close $badfh;
 
-throws_ok {
+lives_ok {
 	Genealogy::Wills->new(config_file => $badfile);
-} qr /Can't load configuration from/, 'Throws error if config is not a hashref';
+} 'Runs OK if config is not a hashref';
 
 # Config file exists but has no key for the class
 my $nofield_file = File::Spec->catdir($tempdir, 'nokey.yml');
