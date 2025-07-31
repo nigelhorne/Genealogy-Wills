@@ -45,6 +45,7 @@ my $prereqs = {
 	'Module::Info' => 0,
 	'Object::Configure' => 0.10,
 	'Params::Get' => 0,
+	'Return::Set' => 0,
 	'Scalar::Util' => 0
 };
 
@@ -72,7 +73,7 @@ if($^O eq 'darwin') {
 
 WriteMakefile(
 	NAME		=> 'Genealogy::Wills',
-	AUTHOR		=> q{Nigel Horne <njh@bandsman.co.uk>},
+	AUTHOR		=> q{Nigel Horne <njh@nigelhorne.com>},
 	VERSION_FROM	=> 'lib/Genealogy/Wills.pm',
 	ABSTRACT_FROM	=> 'lib/Genealogy/Wills.pm',
 	((defined($ExtUtils::MakeMaker::VERSION) &&
@@ -92,7 +93,7 @@ WriteMakefile(
 		'Test::Warnings' => 0,
 		# 'Test::Kwalitee' => 0,
 		'IPC::System::Simple' => 0,
-		'YAML::XS' => 0
+		'YAML::Any' => 0
 	}, PREREQ_PM => $prereqs,
 	dist => $dist,
 	clean => { FILES => 'Genealogy-Wills-*' },

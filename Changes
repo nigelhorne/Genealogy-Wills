@@ -2,8 +2,8 @@ Revision history for Genealogy::Wills
 
 0.08
 	Fix http://www.cpantesters.org/cpan/report/b5e051e4-1e37-11f0-98b0-b3c3213a625c
-	Use Object::Configure
-	Use Params::Get
+	Use Object::Configure, Params::Get, Return::Set
+	Use YAML::Any instead of YAML::XS
 
 0.07	Wed Apr 16 07:47:03 EDT 2025
 	Use Test::HTTPStatus

@@ -6,7 +6,7 @@ use warnings;
 use Test::Most;
 use File::Spec;
 use File::Temp qw/tempfile tempdir/;
-use YAML::XS qw/DumpFile/;
+use YAML::Any qw/DumpFile/;
 
 use_ok('Genealogy::Wills');
 
