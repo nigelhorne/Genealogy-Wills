@@ -7,7 +7,7 @@ use Data::Reuse;
 use File::Spec;
 use Module::Info;
 use Object::Configure 0.10;
-use Params::Get;
+use Params::Get 0.13;
 use Return::Set;
 use Scalar::Util;
 
