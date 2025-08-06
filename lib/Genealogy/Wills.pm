@@ -96,7 +96,7 @@ sub new
 		$directory =~ s/\.pm$//;
 		$params->{'directory'} = File::Spec->catfile($directory, 'data');
 	}
-	if(!-d $params->{'directory'}) {
+	unless((-d $params->{'directory'}) && (-r $params->{'directory'})) {
 		Carp::carp(__PACKAGE__, ': ', $params->{'directory'}, ' is not a directory');
 		return;
 	}
@@ -152,7 +152,7 @@ sub search {
 	$will->{'url'} = 'https://' . $will->{'url'};
 	Data::Reuse::fixate(%{$will});
 
-	return Return::Set($will, { 'type' => 'hashref', 'min' => 1 });
+	return Return::Set::set_return($will, { 'type' => 'hashref', 'min' => 1 });
 }
 
 =head1 AUTHOR
