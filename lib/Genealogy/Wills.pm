@@ -25,6 +25,23 @@ Version 0.09
 
 our $VERSION = '0.09';
 
+# Class-level constants
+use constant {
+	DEFAULT_CACHE_DURATION => '1 day',	# The database is updated daily
+	MIN_LAST_NAME_LENGTH   => 1,
+	MAX_LAST_NAME_LENGTH   => 100,
+};
+
+=head1 DESCRIPTION
+
+This module provides a convenient interface to search through a database of historical wills,
+primarily focused on the Kent Wills Transcript.
+It handles database connections, caching, and result formatting.
+
+- Results are cached for 1 day by default
+- Database connections are lazy-loaded
+- Large result sets may consume significant memory
+
 =head1 SYNOPSIS
 
     # See https://freepages.rootsweb.com/~mrawson/genealogy/wills.html
@@ -110,7 +127,7 @@ sub new
 
 	# cache_duration can be overriden by the args
 	return bless {
-		cache_duration => '1 day',	# The database is updated daily
+		cache_duration => DEFAULT_CACHE_DURATION,
 		%{$params}
 	}, $class;
 }

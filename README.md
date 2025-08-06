@@ -6,6 +6,16 @@ Genealogy::Wills - Lookup in a database of wills
 
 Version 0.09
 
+# DESCRIPTION
+
+This module provides a convenient interface to search through a database of historical wills,
+primarily focused on the Kent Wills Transcript.
+It handles database connections, caching, and result formatting.
+
+\- Results are cached for 1 day by default
+\- Database connections are lazy-loaded
+\- Large result sets may consume significant memory
+
 # SYNOPSIS
 
     # See https://freepages.rootsweb.com/~mrawson/genealogy/wills.html
@@ -85,7 +95,7 @@ Each record includes a formatted `url` field.
     ∀ db: WillsDatabase; params: SearchParams •
         params.last ≠ ∅ ⇒
         search(db, params) = {r: WillRecord | r.last = params.last ∧ matches(r, params)}
-    
+
     ∀ db: WillsDatabase; params: SearchParams •
         params.last = ∅ ⇒
         search(db, params) = ∅
