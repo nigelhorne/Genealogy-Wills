@@ -6,7 +6,7 @@ use Carp;
 use Data::Reuse;
 use File::Spec;
 use Module::Info;
-use Object::Configure 0.10;
+use Object::Configure 0.12;
 use Params::Get 0.13;
 use Return::Set;
 use Scalar::Util;

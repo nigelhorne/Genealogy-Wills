@@ -43,7 +43,7 @@ my $prereqs = {
 	'File::Spec' => 0,
 	'File::Temp' => 0,
 	'Module::Info' => 0,
-	'Object::Configure' => 0.10,
+	'Object::Configure' => 0.12,
 	'Params::Get' => 0.13,
 	'Return::Set' => 0,
 	'Scalar::Util' => 0
@@ -84,7 +84,9 @@ WriteMakefile(
 	'DEFINE' => '',     # e.g., '-DHAVE_SOMETHING'
 	'INC' => '',	# e.g., '-I/usr/include/other'
 	PL_FILES => (defined($ENV{'AUTOMATED_TESTING'}) ? {} : {'bin/create_db.PL' => 'bin/create_db'}),
-	TEST_REQUIRES => {
+	CONFIGURE_REQUIRES => {
+		'ExtUtils::MakeMaker' => 6.64,	# Minimum version for TEST_REQUIRES
+	}, TEST_REQUIRES => {
 		'File::Temp' => 0,
 		'Test::Carp' => 0,
 		'Test::DescribeMe' => 0,
