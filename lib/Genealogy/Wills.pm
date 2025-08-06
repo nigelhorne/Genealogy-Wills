@@ -8,6 +8,7 @@ use File::Spec;
 use Module::Info;
 use Object::Configure 0.12;
 use Params::Get 0.13;
+use Params::Validate::Strict 0.09;
 use Return::Set;
 use Scalar::Util;
 
@@ -152,7 +153,37 @@ Each record includes a formatted C<url> field.
 
 sub search {
 	my $self = shift;
-	my $params = Params::Get::get_params('last', @_);
+        my $params = Params::Validate::Strict::validate_strict({
+		args => Params::Get::get_params('last', @_),
+		schema => {
+			'last' => {
+				type => 'string',
+				min => 1,
+				max => 100,
+				matches => qr/^\w+$/
+			}, 'first' => {
+				type => 'string',
+				optional => 1,
+				min => 1,
+				max => 100
+			}, 'middle' => {
+				type => 'string',
+				optional => 1,
+				min => 1,
+				max => 100
+			}, 'town' => {
+				type => 'string',
+				optional => 1,
+				min => 1,
+				max => 100
+			}, 'year' => {
+				type => 'integer',
+				optional => 1,
+				min => 1,
+				max => 2025
+			}
+		}
+	});
 
 	# Validate required parameters thoroughly
 	unless((defined($params->{'last'})) && (length($params->{'last'}) > 0)) {

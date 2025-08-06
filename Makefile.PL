@@ -45,6 +45,7 @@ my $prereqs = {
 	'Module::Info' => 0,
 	'Object::Configure' => 0.12,
 	'Params::Get' => 0.13,
+	'Params::Validate::Strict' => 0.09,
 	'Return::Set' => 0,
 	'Scalar::Util' => 0
 };
