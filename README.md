@@ -54,9 +54,45 @@ Each record includes a formatted `url` field.
 
     print $smiths[0]->{'first'}, "\n";
 
+# FORMAL SPECIFICATION
+
+    [NAME, URL, DIRECTORY]
+
+    WillRecord == [
+        first: NAME;
+        last: NAME;
+        url: URL;
+        additional_fields: ℙ(NAME × seq CHAR)
+    ]
+
+    WillsDatabase == [
+        directory: DIRECTORY;
+        cache_duration: ℕ;
+        logger: LOGGER
+    ]
+
+    SearchParams == [
+        last: NAME;
+        first: NAME;
+        optional_params: ℙ(NAME × seq CHAR)
+    ]
+
+    │ last ≠ ∅  -- last name cannot be empty
+    │ |last| > 0  -- last name must have positive length
+
+    search: WillsDatabase × SearchParams → ℙ WillRecord
+
+    ∀ db: WillsDatabase; params: SearchParams •
+        params.last ≠ ∅ ⇒
+        search(db, params) = {r: WillRecord | r.last = params.last ∧ matches(r, params)}
+    
+    ∀ db: WillsDatabase; params: SearchParams •
+        params.last = ∅ ⇒
+        search(db, params) = ∅
+
 # AUTHOR
 
-Nigel Horne, `<njh at bandsman.co.uk>`
+Nigel Horne, `<njh at nigelhorne.com>`
 
 # BUGS
 

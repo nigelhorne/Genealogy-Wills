@@ -166,9 +166,47 @@ sub search {
 	return Return::Set::set_return($will, { 'type' => 'hashref', 'min' => 1 });
 }
 
+=encoding utf-8
+
+=head1 FORMAL SPECIFICATION
+
+    [NAME, URL, DIRECTORY]
+
+    WillRecord == [
+        first: NAME;
+        last: NAME;
+        url: URL;
+        additional_fields: ℙ(NAME × seq CHAR)
+    ]
+
+    WillsDatabase == [
+        directory: DIRECTORY;
+        cache_duration: ℕ;
+        logger: LOGGER
+    ]
+
+    SearchParams == [
+        last: NAME;
+        first: NAME;
+        optional_params: ℙ(NAME × seq CHAR)
+    ]
+
+    │ last ≠ ∅  -- last name cannot be empty
+    │ |last| > 0  -- last name must have positive length
+
+    search: WillsDatabase × SearchParams → ℙ WillRecord
+
+    ∀ db: WillsDatabase; params: SearchParams •
+        params.last ≠ ∅ ⇒
+        search(db, params) = {r: WillRecord | r.last = params.last ∧ matches(r, params)}
+
+    ∀ db: WillsDatabase; params: SearchParams •
+        params.last = ∅ ⇒
+        search(db, params) = ∅
+
 =head1 AUTHOR
 
-Nigel Horne, C<< <njh at bandsman.co.uk> >>
+Nigel Horne, C<< <njh at nigelhorne.com> >>
 
 =head1 BUGS
 
