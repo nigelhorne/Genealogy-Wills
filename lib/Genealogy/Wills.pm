@@ -153,6 +153,10 @@ Each record includes a formatted C<url> field.
 
 sub search {
 	my $self = shift;
+
+	# Ensure $self is valid
+	Carp::croak('search() must be called on an object') unless(Scalar::Util::blessed($self));
+
         my $params = Params::Validate::Strict::validate_strict({
 		args => Params::Get::get_params('last', @_),
 		schema => {
