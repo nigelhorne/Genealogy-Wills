@@ -209,13 +209,15 @@ sub search {
 		foreach my $will(@wills) {
 			$will->{'url'} = 'https://' . $will->{'url'};
 		}
+		Data::Reuse::fixate(@wills);
 		return @wills;
 	}
-	my $will = $self->{'wills'}->fetchrow_hashref($params);
-	$will->{'url'} = 'https://' . $will->{'url'};
-	Data::Reuse::fixate(%{$will});
+	if(defined(my $will = $self->{'wills'}->fetchrow_hashref($params))) {
+		$will->{'url'} = 'https://' . $will->{'url'};
+		Data::Reuse::fixate(%{$will});
 
-	return Return::Set::set_return($will, { 'type' => 'hashref', 'min' => 1 });
+		return Return::Set::set_return($will, { 'type' => 'hashref', 'min' => 1 });
+	}
 }
 
 =encoding utf-8
