@@ -109,7 +109,7 @@ sub new
 	# Load the configuration from a config file, if provided
 	$params = Object::Configure::configure($class, $params);
 
-	if(!defined(my $directory = ($params->{'directory'} || $Genealogy::Wills::obituaries->{'directory'} || $Database::Abstraction{'defaults'}{'directory'}))) {
+	if(!defined(my $directory = ($params->{'directory'} || $Genealogy::Wills::obituaries->{'directory'}))) {
 		# If the directory argument isn't given, see if we can find the data
 		$directory ||= Module::Info->new_from_loaded(__PACKAGE__)->file();
 		$directory =~ s/\.pm$//;
