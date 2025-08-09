@@ -71,7 +71,7 @@ This allows the parameters to be set at run time.
 
 =item * C<directory>
 
-That is the directory containing obituaries.sql.
+That is the directory containing wills.sql.
 If not given, the use the module's data directory.
 
 =item * C<logger>
@@ -109,7 +109,7 @@ sub new
 	# Load the configuration from a config file, if provided
 	$params = Object::Configure::configure($class, $params);
 
-	if(!defined(my $directory = ($params->{'directory'} || $Genealogy::Wills::obituaries->{'directory'}))) {
+	if(!defined(my $directory = ($params->{'directory'} || $Genealogy::Wills->{'directory'}))) {
 		# If the directory argument isn't given, see if we can find the data
 		$directory ||= Module::Info->new_from_loaded(__PACKAGE__)->file();
 		$directory =~ s/\.pm$//;
