@@ -4,16 +4,14 @@ use warnings;
 use strict;
 use Carp;
 use Data::Reuse;
-use Database::Abstraction;
 use File::Spec;
+use Genealogy::Wills::wills;
 use Module::Info;
 use Object::Configure 0.12;
 use Params::Get 0.13;
 use Params::Validate::Strict 0.09;
 use Return::Set;
 use Scalar::Util;
-
-use Genealogy::Wills::wills;
 
 =head1 NAME
 
@@ -85,9 +83,14 @@ An object to send log messages to
 sub new
 {
 	my $class = shift;
+	my $params;
 
 	# Handle hash or hashref arguments
-	my $params = Params::Get::get_params(undef, \@_);
+	if((scalar(@_) == 1) && !ref($_[0])) {
+		$params->{'directory'} = $_[0];
+	} else {
+		$params = Params::Get::get_params(undef, \@_);
+	}
 
 	if(!defined($class)) {
 		if((scalar keys %{$params}) > 0) {
@@ -115,6 +118,7 @@ sub new
 		$directory =~ s/\.pm$//;
 		$params->{'directory'} = File::Spec->catfile($directory, 'data');
 	}
+
 	unless((-d $params->{'directory'}) && (-r $params->{'directory'})) {
 		Carp::carp(__PACKAGE__, ': ', $params->{'directory'}, ' is not a directory');
 		return;
