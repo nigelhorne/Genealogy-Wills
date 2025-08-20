@@ -44,7 +44,7 @@ my $prereqs = {
 	'DBD::SQLite' => 0,
 	'DBD::SQLite::Constants' => 0,
 	'Error::Simple' => 0,
-	'ExtUtils::MakeMaker' => 6.64,	# 6.64 for TEST_REQUIRES
+	'ExtUtils::MakeMaker' => 6.64,	# Minimum version for TEST_REQUIRES
 	'File::Basename' => 0,
 	'File::pfopen' => 0,
 	'File::Slurp' => 0,
@@ -110,7 +110,9 @@ WriteMakefile(
 	dist => $dist,
 	clean => { FILES => 'Genealogy-Wills-*' },
 	realclean => {
-		FILES => 'Genealogy-Wills-* lib/Genealogy/Wills/data'
+		# This would seem logical, but it will break "make && make test" even though you don't call "make realclean"
+		# FILES => 'Genealogy-Wills-* lib/Genealogy/Wills/data'
+		FILES => 'Genealogy-Wills-*'
 	},
 	# META_ADD => {
 		# provides => {}
