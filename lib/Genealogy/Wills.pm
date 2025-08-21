@@ -210,12 +210,15 @@ sub search {
 	}
 
 	if(wantarray) {
-		my @wills = @{$self->{'wills'}->selectall_hashref($params)};
-		foreach my $will(@wills) {
-			$will->{'url'} = 'https://' . $will->{'url'};
+		if(my $willslist = $self->{'wills'}->selectall_hashref($params)) {
+			my @wills = @{$willslist};
+			foreach my $will(@wills) {
+				$will->{'url'} = 'https://' . $will->{'url'};
+			}
+			Data::Reuse::fixate(@wills);
+			return @wills;
 		}
-		Data::Reuse::fixate(@wills);
-		return @wills;
+		return;
 	}
 	if(defined(my $will = $self->{'wills'}->fetchrow_hashref($params))) {
 		$will->{'url'} = 'https://' . $will->{'url'};
