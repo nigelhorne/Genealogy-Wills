@@ -169,7 +169,7 @@ sub search {
 				type => 'string',
 				min => 1,
 				max => 100,
-				matches => qr/^\w+$/
+				matches => qr/^[\w\-]+$/	# Allow hyphens in surnames
 			}, 'first' => {
 				type => 'string',
 				optional => 1,

@@ -4,6 +4,7 @@ Revision history for Genealogy::Wills
 	Fix return in scalar context
 	Validate last name
 	Fixate arrays
+	Allow hyphens in surnames
 
 0.09	Wed Aug  6 08:29:26 EDT 2025
 	Bump minimum version of Params::Get
