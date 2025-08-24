@@ -4,7 +4,7 @@ Genealogy::Wills - Lookup in a database of wills
 
 # VERSION
 
-Version 0.09
+Version 0.10
 
 # DESCRIPTION
 
@@ -41,7 +41,7 @@ which can be hash, hash-ref or key-value pairs.
 
 - `directory`
 
-    That is the directory containing obituaries.sql.
+    That is the directory containing wills.sql.
     If not given, the use the module's data directory.
 
 - `logger`

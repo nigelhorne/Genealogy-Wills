@@ -127,9 +127,9 @@ WriteMakefile(
 				repository => 'https://github.com/nigelhorne/Genealogy-Wills',
 			},
 			bugtracker => {
-				# web => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Genealogy-Wills',
-				# mailto => 'bug-Genealogy-Wills@rt.cpan.org'
-				web => 'https://github.com/nigelhorne/Genealogy-Wills/issues',
+				url => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Genealogy-Wills',
+				web => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Genealogy-Wills',
+				# web => 'https://github.com/nigelhorne/Genealogy-Wills/issues',
 				mailto => 'bug-Genealogy-Wills@rt.cpan.org'
 			}, homepage => 'https://sites.rootsweb.com/~obituary',
 		},
