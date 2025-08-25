@@ -38,6 +38,7 @@ BEGIN {
 
 my $force_flag;
 my $dir = 'lib/Genealogy/Wills/data';
+my $bdir = "blib/$dir";
 
 if(defined($ARGV[0]) && ($ARGV[0] eq '-f')) {
 	$force_flag++;
@@ -116,6 +117,10 @@ $dbh->do('pragma optimize');
 $dbh->disconnect();
 
 print "\n";
+
+if(-d $bdir) {
+	link $filename, "b$filename";
+}
 
 sub mrawson($$) {
 	my $ua = shift;
