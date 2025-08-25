@@ -38,7 +38,7 @@ BEGIN {
 
 my $force_flag;
 my $dir = 'lib/Genealogy/Wills/data';
-my $bdir = "blib/$dir";
+my $bdir = File::Spec->catdir('blib', $dir);
 
 if(defined($ARGV[0]) && ($ARGV[0] eq '-f')) {
 	$force_flag++;
@@ -119,7 +119,9 @@ $dbh->disconnect();
 print "\n";
 
 if(-d $bdir) {
-	link $filename, "b$filename";
+	my $bfilename = File::Spec->catdir($bdir, 'wills.sql');
+	unlink($bfilename) if(-e $bfilename);
+	link $filename, $bfilename;
 }
 
 sub mrawson($$) {
