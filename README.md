@@ -205,16 +205,33 @@ On failure: `undef`, with a warning printed to STDERR naming the problem.
 
 ### API SPECIFICATION
 
-    # Input -- all keys are optional
+#### input
+
+`new()` uses `Params::Get` to normalize its arguments but does not apply
+`Params::Validate::Strict` validation. The recognized parameters are:
+
+    # Params::Get::get_params(undef, @_) -- normalizes to a hashref.
+    # Accepted as: flat list, hash reference, or a single string (= directory).
     {
-        directory      => Str,      # readable directory path
-        config_file    => Str,      # readable file path (croaks if unreadable)
-        logger         => Object,   # must implement info() and error()
-        cache_duration => Str,      # e.g. '1 day', '12 hours'
+        directory      => { type => 'string' },   # readable directory path
+        config_file    => { type => 'string' },   # readable path; croaks if missing
+        logger         => { type => 'object',
+                            can => [ 'info', 'error' ],
+                            optional => 1
+                          },
+        cache_duration => { type => 'string',
+                            default => '1 day',
+                            optional => 1
+                          },
     }
 
-    # Return type
-    Genealogy::Wills | undef
+#### output
+
+    # Return::Set is not used by new().
+    output => {
+        type => 'hashref',
+        optional => 1
+    }
 
 ### MESSAGES
 
@@ -345,29 +362,46 @@ Each hash reference has these keys: `first`, `last`, `middle`, `town`,
 
 ### API SPECIFICATION
 
-    # Input
-    {
-        last   => Str,    # required; /^[\w-]+$/ after stripping; 1-100 chars
-        first  => Str,    # optional; 1-100 chars
-        middle => Str,    # optional; 1-100 chars
-        town   => Str,    # optional; 1-100 chars
-        year   => Int,    # optional; 1 .. MAX_WILL_YEAR (current year at load)
-    }
+#### input
 
-    # List context return
-    Returns: Array of HashRef, each containing:
-        {
-            first  => Str,
-            last   => Str,
-            middle => Str | undef,
-            town   => Str | undef,
-            year   => Int | undef,
-            url    => Str,          # always "https://..."
-        }
-    Returns empty list when no records match.
+    schema => {
+        last   => { type => 'string',
+                    min  => 1, max => 100,
+                    matches => qr/^[\w-]+$/ },
+        first  => { type => 'string',
+                    min  => 1, max => 100,
+                    optional => 1 },
+        middle => { type => 'string',
+                    min  => 1, max => 100,
+                    optional => 1 },
+        town   => { type => 'string',
+                min  => 1, max => 100,
+                    optional => 1 },
+        year   => { type => 'integer',
+                    min  => 1, max => MAX_WILL_YEAR,
+                    optional => 1 },
+    };
 
-    # Scalar context return (wrapped by Return::Set)
-    Returns: HashRef (same shape as above) | undef
+`MAX_WILL_YEAR` is `(localtime)[5] + 1900` computed once at module load.
+`Params::Get::get_params('last', ...)` maps a bare string argument to
+`{ last => $string }` before validation runs.
+
+#### output
+
+    # List context -- no Return::Set wrapping
+    Returns: Array of HashRef
+             Each HashRef: { first  => { type => 'string', optional => 1 },
+                             last   => 'string',
+                             middle => { type => 'string', optional => 1 },
+                             town   => { type => 'string', optional => 1 },
+                             year   => { type => 'integer', optional => 1 },
+                             url    => { 'string', matches => qr/^https:\/=// }
+                           }
+             Empty list when nothing matches.
+
+    # Scalar context -- wrapped by Return::Set
+    Return::Set::set_return($will, { type => 'hashref', min => 1 });
+    Returns: HashRef (same shape) | undef
 
 ### MESSAGES
 
@@ -432,61 +466,6 @@ A plain-English description of what `search()` does, step by step:
            Prepend "https://" to its url.
            Intern all strings.
            Return the hashref (or undef if nothing matched).
-
-### FORMAL SPECIFICATION
-
-The following Z-notation gives the precise mathematical meaning of `search()`.
-Optional fields that the caller did not supply are modelled as undefined.
-
-    -- Type aliases
-    NAME == seq₁ CHAR       -- a non-empty sequence of characters
-    YEAR == 1 .. MaxYear    -- positive integer bounded by current year
-
-    -- One record stored in the database
-    WillRecord
-      first  : NAME
-      last   : NAME
-      middle : NAME | undefined
-      town   : NAME | undefined
-      year   : YEAR | undefined
-      url    : NAME           -- stored without "https://"; prefixed by search()
-
-    -- Parameters passed to search()
-    SearchParams
-      last   : NAME
-      first  : NAME | undefined
-      middle : NAME | undefined
-      town   : NAME | undefined
-      year   : YEAR | undefined
-
-    -- Invariant: last name must be non-empty
-    ┌ SearchParams ──────────────────┐
-    │ last : NAME                    │
-    │ ─────────────────────────────  │
-    │ last ≠ ⟨⟩                      │
-    └────────────────────────────────┘
-
-    -- Predicate: does record r satisfy all supplied parameters?
-    matches : WillRecord × SearchParams → BOOL
-    matches(r, p) ==
-        r.last = p.last
-        ∧  (p.first  = undefined  ∨  r.first  = p.first)
-        ∧  (p.middle = undefined  ∨  r.middle = p.middle)
-        ∧  (p.town   = undefined  ∨  r.town   = p.town)
-        ∧  (p.year   = undefined  ∨  r.year   = p.year)
-
-    -- Function signature
-    search : WillsDatabase × SearchParams → ℙ WillRecord
-
-    -- When last is non-empty, return all records that match
-    ∀ db : WillsDatabase; p : SearchParams •
-        p.last ≠ ⟨⟩  ⟹
-            search(db, p) = { r : WillRecord | r ∈ db.records ∧ matches(r, p) }
-
-    -- When last is empty, return nothing
-    ∀ db : WillsDatabase; p : SearchParams •
-        p.last = ⟨⟩  ⟹
-            search(db, p) = ∅
 
 # COMMON PITFALLS
 
@@ -668,10 +647,13 @@ When reporting a bug, please include:
     [https://freepages.rootsweb.com/~mrawson/genealogy/wills.html](https://freepages.rootsweb.com/~mrawson/genealogy/wills.html)
 
 - [Database::Abstraction](https://metacpan.org/pod/Database%3A%3AAbstraction) -- the SQL layer used internally by this module.
-- [Object::Configure](https://metacpan.org/pod/Object%3A%3AConfigure) -- handles config file loading in `new()`.
+- [Configure an Object at Runtime](https://metacpan.org/pod/Object%3A%3AConfigure)
+- [Test Dashboard](https://nigelhorne.github.io/Genealogy-Wills/coverage/)
 - [Return::Set](https://metacpan.org/pod/Return%3A%3ASet) -- enforces return-type contracts on `search()`.
 
 # SUPPORT
+
+This module is provided as-is without any warranty.
 
 You can find documentation for this module with the perldoc command:
 
@@ -694,6 +676,63 @@ Other resources:
 - CPAN Testers Dependencies
 
     [http://deps.cpantesters.org/?module=Genealogy::Wills](http://deps.cpantesters.org/?module=Genealogy::Wills)
+
+# FORMAL SPECIFICATION
+
+## search
+
+The following Z-notation gives the precise mathematical meaning of `search()`.
+Optional fields that the caller did not supply are modelled as undefined.
+
+    -- Type aliases
+    NAME == seq₁ CHAR       -- a non-empty sequence of characters
+    YEAR == 1 .. MaxYear    -- positive integer bounded by current year
+
+    -- One record stored in the database
+    WillRecord
+      first  : NAME
+      last   : NAME
+      middle : NAME | undefined
+      town   : NAME | undefined
+      year   : YEAR | undefined
+      url    : NAME           -- stored without "https://"; prefixed by search()
+
+    -- Parameters passed to search()
+    SearchParams
+      last   : NAME
+      first  : NAME | undefined
+      middle : NAME | undefined
+      town   : NAME | undefined
+      year   : YEAR | undefined
+
+    -- Invariant: last name must be non-empty
+    ┌ SearchParams ──────────────────┐
+    │ last : NAME                    │
+    │ ─────────────────────────────  │
+    │ last ≠ ⟨⟩                      │
+    └────────────────────────────────┘
+
+    -- Predicate: does record r satisfy all supplied parameters?
+    matches : WillRecord × SearchParams → BOOL
+    matches(r, p) ==
+        r.last = p.last
+        ∧  (p.first  = undefined  ∨  r.first  = p.first)
+        ∧  (p.middle = undefined  ∨  r.middle = p.middle)
+        ∧  (p.town   = undefined  ∨  r.town   = p.town)
+        ∧  (p.year   = undefined  ∨  r.year   = p.year)
+
+    -- Function signature
+    search : WillsDatabase × SearchParams → ℙ WillRecord
+
+    -- When last is non-empty, return all records that match
+    ∀ db : WillsDatabase; p : SearchParams •
+        p.last ≠ ⟨⟩  ⟹
+            search(db, p) = { r : WillRecord | r ∈ db.records ∧ matches(r, p) }
+
+    -- When last is empty, return nothing
+    ∀ db : WillsDatabase; p : SearchParams •
+        p.last = ⟨⟩  ⟹
+            search(db, p) = ∅
 
 # LICENSE AND COPYRIGHT
 
