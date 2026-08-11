@@ -20,30 +20,30 @@ https://pjcj.net
 <h1>File Coverage</h1>
 <table>
 <tr><td class="h" align="right">File:</td><td align="left">blib/lib/Genealogy/Wills.pm</td></tr>
-<tr><td class="h" align="right">Coverage:</td><td align="left" class="c1">86.8%</td></tr>
+<tr><td class="h" align="right">Coverage:</td><td align="left" class="c1">88.7%</td></tr>
 </table>
 <div><br/></div>
 <table>
 <tr><th>line</th><th>stmt</th><th>bran</th><th>cond</th><th>sub</th><th>time</th><th>code</th></tr>
 <tr><td class="h">1</td><td></td><td></td><td></td><td></td><td></td><td class="s">package Genealogy::Wills;</td></tr>
-<tr><td class="h">2</td><td colspan="6"></td></tr><tr><td class="h">3</td><td><div class="c3">6</div><div class="c3">6</div><div class="c3">6</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L3">6</a></div></td><td><div>362485</div><div>1</div><div>56</div></td><td class="s">use strict;</td></tr>
-<tr><td class="h">4</td><td><div class="c3">6</div><div class="c3">6</div><div class="c3">6</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L4">6</a></div></td><td><div>8</div><div>3</div><div>108</div></td><td class="s">use warnings;</td></tr>
-<tr><td class="h">5</td><td><div class="c3">6</div><div class="c3">6</div><div class="c3">6</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L5">6</a></div></td><td><div>861</div><div>33142</div><div>10</div></td><td class="s">use autodie qw(:all);</td></tr>
+<tr><td class="h">2</td><td colspan="6"></td></tr><tr><td class="h">3</td><td><div class="c3">7</div><div class="c3">7</div><div class="c3">7</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L3">7</a></div></td><td><div>433830</div><div>5</div><div>74</div></td><td class="s">use strict;</td></tr>
+<tr><td class="h">4</td><td><div class="c3">7</div><div class="c3">7</div><div class="c3">7</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L4">7</a></div></td><td><div>8</div><div>6</div><div>131</div></td><td class="s">use warnings;</td></tr>
+<tr><td class="h">5</td><td><div class="c3">7</div><div class="c3">7</div><div class="c3">7</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L5">7</a></div></td><td><div>1348</div><div>46451</div><div>11</div></td><td class="s">use autodie qw(:all);</td></tr>
 <tr><td class="h">6</td><td></td><td></td><td></td><td></td><td></td><td class="s"># Carp is intentionally NOT imported into this namespace. All calls must be</td></tr>
 <tr><td class="h">7</td><td></td><td></td><td></td><td></td><td></td><td class="s"># fully-qualified (Carp::croak, Carp::carp) so that Test::Carp can intercept</td></tr>
 <tr><td class="h">8</td><td></td><td></td><td></td><td></td><td></td><td class="s"># them at runtime. Bare imported aliases are compile-time copies and bypass</td></tr>
 <tr><td class="h">9</td><td></td><td></td><td></td><td></td><td></td><td class="s"># the runtime override that Test::Carp installs.</td></tr>
-<tr><td class="h">10</td><td><div class="c3">6</div><div class="c3">6</div><div class="c3">6</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L10">6</a></div></td><td><div>43058</div><div>5</div><div>49</div></td><td class="s">use Carp ();</td></tr>
-<tr><td class="h">11</td><td><div class="c3">6</div><div class="c3">6</div><div class="c3">6</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L11">6</a></div></td><td><div>977</div><div>30248</div><div>121</div></td><td class="s">use Data::Reuse;</td></tr>
-<tr><td class="h">12</td><td><div class="c3">6</div><div class="c3">6</div><div class="c3">6</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L12">6</a></div></td><td><div>995</div><div>8497</div><div>141</div></td><td class="s">use Readonly;</td></tr>
-<tr><td class="h">13</td><td><div class="c3">6</div><div class="c3">6</div><div class="c3">6</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L13">6</a></div></td><td><div>16</div><div>5</div><div>61</div></td><td class="s">use File::Spec;</td></tr>
-<tr><td class="h">14</td><td><div class="c3">6</div><div class="c3">6</div><div class="c3">6</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L14">6</a></div></td><td><div>586</div><div>13</div><div>23</div></td><td class="s">use Genealogy::Wills::wills;</td></tr>
-<tr><td class="h">15</td><td><div class="c3">6</div><div class="c3">6</div><div class="c3">6</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L15">6</a></div></td><td><div>11458</div><div>10084</div><div>86</div></td><td class="s">use Module::Info;</td></tr>
-<tr><td class="h">16</td><td><div class="c3">6</div><div class="c3">6</div><div class="c3">6</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L16">6</a></div></td><td><div>22</div><div>46</div><div>49</div></td><td class="s">use Object::Configure 0.23;</td></tr>
-<tr><td class="h">17</td><td><div class="c3">6</div><div class="c3">6</div><div class="c3">6</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L17">6</a></div></td><td><div>9</div><div>59</div><div>108</div></td><td class="s">use Params::Get 0.16;</td></tr>
-<tr><td class="h">18</td><td><div class="c3">6</div><div class="c3">6</div><div class="c3">6</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L18">6</a></div></td><td><div>22</div><div>34</div><div>66</div></td><td class="s">use Params::Validate::Strict 0.37;</td></tr>
-<tr><td class="h">19</td><td><div class="c3">6</div><div class="c3">6</div><div class="c3">6</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L19">6</a></div></td><td><div>21</div><div>32</div><div>69</div></td><td class="s">use Return::Set 0.05;</td></tr>
-<tr><td class="h">20</td><td><div class="c3">6</div><div class="c3">6</div><div class="c3">6</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L20">6</a></div></td><td><div>8</div><div>5</div><div>2799</div></td><td class="s">use Scalar::Util qw(blessed);</td></tr>
+<tr><td class="h">10</td><td><div class="c3">7</div><div class="c3">7</div><div class="c3">7</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L10">7</a></div></td><td><div>56848</div><div>12</div><div>54</div></td><td class="s">use Carp ();</td></tr>
+<tr><td class="h">11</td><td><div class="c3">7</div><div class="c3">7</div><div class="c3">7</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L11">7</a></div></td><td><div>1578</div><div>44506</div><div>166</div></td><td class="s">use Data::Reuse;</td></tr>
+<tr><td class="h">12</td><td><div class="c3">7</div><div class="c3">7</div><div class="c3">7</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L12">7</a></div></td><td><div>1648</div><div>11183</div><div>170</div></td><td class="s">use Readonly;</td></tr>
+<tr><td class="h">13</td><td><div class="c3">7</div><div class="c3">7</div><div class="c3">7</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L13">7</a></div></td><td><div>14</div><div>6</div><div>71</div></td><td class="s">use File::Spec;</td></tr>
+<tr><td class="h">14</td><td><div class="c3">7</div><div class="c3">7</div><div class="c3">7</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L14">7</a></div></td><td><div>942</div><div>14</div><div>29</div></td><td class="s">use Genealogy::Wills::wills;</td></tr>
+<tr><td class="h">15</td><td><div class="c3">7</div><div class="c3">7</div><div class="c3">7</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L15">7</a></div></td><td><div>14191</div><div>13311</div><div>98</div></td><td class="s">use Module::Info;</td></tr>
+<tr><td class="h">16</td><td><div class="c3">7</div><div class="c3">7</div><div class="c3">7</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L16">7</a></div></td><td><div>24</div><div>56</div><div>59</div></td><td class="s">use Object::Configure 0.23;</td></tr>
+<tr><td class="h">17</td><td><div class="c3">7</div><div class="c3">7</div><div class="c3">7</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L17">7</a></div></td><td><div>13</div><div>44</div><div>109</div></td><td class="s">use Params::Get 0.16;</td></tr>
+<tr><td class="h">18</td><td><div class="c3">7</div><div class="c3">7</div><div class="c3">7</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L18">7</a></div></td><td><div>15</div><div>34</div><div>78</div></td><td class="s">use Params::Validate::Strict 0.37;</td></tr>
+<tr><td class="h">19</td><td><div class="c3">7</div><div class="c3">7</div><div class="c3">7</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L19">7</a></div></td><td><div>10</div><div>32</div><div>78</div></td><td class="s">use Return::Set 0.05;</td></tr>
+<tr><td class="h">20</td><td><div class="c3">7</div><div class="c3">7</div><div class="c3">7</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L20">7</a></div></td><td><div>9</div><div>5</div><div>3649</div></td><td class="s">use Scalar::Util qw(blessed);</td></tr>
 <tr><td class="h">21</td><td colspan="6"></td></tr><tr><td class="h">22</td><td></td><td></td><td></td><td></td><td></td><td class="s">=encoding utf-8</td></tr>
 <tr><td class="h">23</td><td colspan="6"></td></tr><tr><td class="h">24 - 32</td><td colspan="5"></td><td class="s"><pre>=head1 NAME
 
@@ -325,18 +325,18 @@ C&lt;perl bin/create_db.PL&gt;.
 
 =cut</pre></td></tr>
 <tr><td class="h">306</td><td colspan="6"></td></tr><tr><td class="h">307</td><td></td><td></td><td></td><td></td><td></td><td class="s">sub new {</td></tr>
-<tr><td class="h">308</td><td><div class="c3">17</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L308">17</a></div></td><td><div>334065</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;my $class = shift;</td></tr>
-<tr><td class="h">309</td><td><div class="c3">17</div></td><td></td><td></td><td></td><td><div>17</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;my $params;</td></tr>
-<tr><td class="h">310</td><td colspan="6"></td></tr><tr><td class="h">311</td><td><div class="c3">17</div></td><td><div class="c0" title="-/F"><a href="blib-lib-Genealogy-Wills-pm--branch.html#L311">50</a></div></td><td><div class="c0"><a href="blib-lib-Genealogy-Wills-pm--condition.html#L311">33</a></div></td><td></td><td><div>38</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if((scalar(@_) == 1) &amp;&amp; !ref($_[0])) {</td></tr>
+<tr><td class="h">308</td><td><div class="c3">27</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L308">27</a></div></td><td><div>523065</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;my $class = shift;</td></tr>
+<tr><td class="h">309</td><td><div class="c3">27</div></td><td></td><td></td><td></td><td><div>18</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;my $params;</td></tr>
+<tr><td class="h">310</td><td colspan="6"></td></tr><tr><td class="h">311</td><td><div class="c3">27</div></td><td><div class="c0" title="-/F"><a href="blib-lib-Genealogy-Wills-pm--branch.html#L311">50</a></div></td><td><div class="c0"><a href="blib-lib-Genealogy-Wills-pm--condition.html#L311">33</a></div></td><td></td><td><div>52</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if((scalar(@_) == 1) &amp;&amp; !ref($_[0])) {</td></tr>
 <tr><td class="h">312</td><td><div class="c0">0</div></td><td></td><td></td><td></td><td><div>0</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$params-&gt;{&#39;directory&#39;} = $_[0];</td></tr>
 <tr><td class="h">313</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} else {</td></tr>
-<tr><td class="h">314</td><td><div class="c3">17</div></td><td></td><td></td><td></td><td><div>33</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$params = Params::Get::get_params(undef, \@_);</td></tr>
+<tr><td class="h">314</td><td><div class="c3">27</div></td><td></td><td></td><td></td><td><div>40</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$params = Params::Get::get_params(undef, \@_);</td></tr>
 <tr><td class="h">315</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</td></tr>
 <tr><td class="h">316</td><td colspan="6"></td></tr><tr><td class="h">317</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Premise: $class is one of three mutually exclusive types:</td></tr>
 <tr><td class="h">318</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;(a) undef&nbsp;&nbsp;&nbsp;-- ::new() function form; any arg would have become $class</td></tr>
 <tr><td class="h">319</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;(b) blessed -- called on an existing object (clone request)</td></tr>
 <tr><td class="h">320</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;(c) string&nbsp;&nbsp;-- called as Genealogy::Wills-&gt;new() class method</td></tr>
-<tr><td class="h">321</td><td><div class="c3">17</div></td><td><div class="c3" title="T/F"><a href="blib-lib-Genealogy-Wills-pm--branch.html#L321">100</a></div><div class="c3" title="T/F"><a href="blib-lib-Genealogy-Wills-pm--branch.html#L321">100</a></div></td><td></td><td></td><td><div>258</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if(!defined($class)) {</td></tr>
+<tr><td class="h">321</td><td><div class="c3">27</div></td><td><div class="c3" title="T/F"><a href="blib-lib-Genealogy-Wills-pm--branch.html#L321">100</a></div><div class="c3" title="T/F"><a href="blib-lib-Genealogy-Wills-pm--branch.html#L321">100</a></div></td><td></td><td></td><td><div>383</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if(!defined($class)) {</td></tr>
 <tr><td class="h">322</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# (a) ::new() with no args. Params::Get returns {} for empty input,</td></tr>
 <tr><td class="h">323</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;so no inner check is needed -- the carp branch was unreachable.</td></tr>
 <tr><td class="h">324</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Conclusion: default the class to this package and proceed normally.</td></tr>
@@ -344,33 +344,33 @@ C&lt;perl bin/create_db.PL&gt;.
 <tr><td class="h">326</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} elsif(blessed($class)) {</td></tr>
 <tr><td class="h">327</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# (b) Clone the object. Merge caller overrides on top of the original;</td></tr>
 <tr><td class="h">328</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# // {} handles the no-args case where Params::Get returns undef.</td></tr>
-<tr><td class="h">329</td><td><div class="c3">2</div><div class="c3">2</div><div class="c3">2</div></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--condition.html#L329">100</a></div></td><td></td><td><div>2</div><div>3</div><div>9</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return bless { %{$class}, %{$params // {}} }, ref($class);</td></tr>
+<tr><td class="h">329</td><td><div class="c3">2</div><div class="c3">2</div><div class="c3">2</div></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--condition.html#L329">100</a></div></td><td></td><td><div>1</div><div>3</div><div>9</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return bless { %{$class}, %{$params // {}} }, ref($class);</td></tr>
 <tr><td class="h">330</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</td></tr>
 <tr><td class="h">331</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Post-condition: $class is now a valid package name string.</td></tr>
-<tr><td class="h">332</td><td colspan="6"></td></tr><tr><td class="h">333</td><td><div class="c3">15</div></td><td><div class="c3" title="T/F"><a href="blib-lib-Genealogy-Wills-pm--branch.html#L333">100</a></div></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--condition.html#L333">100</a></div></td><td></td><td><div>70</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if(defined($params-&gt;{&#39;config_file&#39;}) &amp;&amp; !-r $params-&gt;{&#39;config_file&#39;}) {</td></tr>
-<tr><td class="h">334</td><td><div class="c3">2</div></td><td></td><td></td><td></td><td><div>33</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Carp::croak(&quot;Can&#39;t load configuration from &quot; . $params-&gt;{&#39;config_file&#39;});</td></tr>
+<tr><td class="h">332</td><td colspan="6"></td></tr><tr><td class="h">333</td><td><div class="c3">25</div></td><td><div class="c3" title="T/F"><a href="blib-lib-Genealogy-Wills-pm--branch.html#L333">100</a></div></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--condition.html#L333">100</a></div></td><td></td><td><div>106</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if(defined($params-&gt;{&#39;config_file&#39;}) &amp;&amp; !-r $params-&gt;{&#39;config_file&#39;}) {</td></tr>
+<tr><td class="h">334</td><td><div class="c3">3</div></td><td></td><td></td><td></td><td><div>40</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Carp::croak(&quot;Can&#39;t load configuration from &quot; . $params-&gt;{&#39;config_file&#39;});</td></tr>
 <tr><td class="h">335</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</td></tr>
-<tr><td class="h">336</td><td><div class="c3">13</div></td><td></td><td></td><td></td><td><div>25</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$params = Object::Configure::configure($class, $params);</td></tr>
-<tr><td class="h">337</td><td colspan="6"></td></tr><tr><td class="h">338</td><td><div class="c3">13</div></td><td><div class="c3" title="T/F"><a href="blib-lib-Genealogy-Wills-pm--branch.html#L338">100</a></div></td><td></td><td></td><td><div>76571</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;unless($params-&gt;{&#39;directory&#39;}) {</td></tr>
-<tr><td class="h">339</td><td><div class="c3">5</div></td><td></td><td></td><td></td><td><div>14</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;my $module_file = Module::Info-&gt;new_from_loaded(__PACKAGE__)-&gt;file();</td></tr>
-<tr><td class="h">340</td><td><div class="c3">5</div></td><td></td><td></td><td></td><td><div>218</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(my $module_dir = $module_file) =~ s/\.pm$//;</td></tr>
-<tr><td class="h">341</td><td><div class="c3">5</div></td><td></td><td></td><td></td><td><div>68</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$params-&gt;{&#39;directory&#39;} = File::Spec-&gt;catfile($module_dir, &#39;data&#39;);</td></tr>
+<tr><td class="h">336</td><td><div class="c3">22</div></td><td></td><td></td><td></td><td><div>32</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$params = Object::Configure::configure($class, $params);</td></tr>
+<tr><td class="h">337</td><td colspan="6"></td></tr><tr><td class="h">338</td><td><div class="c3">22</div></td><td><div class="c3" title="T/F"><a href="blib-lib-Genealogy-Wills-pm--branch.html#L338">100</a></div></td><td></td><td></td><td><div>97071</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;unless($params-&gt;{&#39;directory&#39;}) {</td></tr>
+<tr><td class="h">339</td><td><div class="c3">6</div></td><td></td><td></td><td></td><td><div>16</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;my $module_file = Module::Info-&gt;new_from_loaded(__PACKAGE__)-&gt;file();</td></tr>
+<tr><td class="h">340</td><td><div class="c3">6</div></td><td></td><td></td><td></td><td><div>302</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(my $module_dir = $module_file) =~ s/\.pm$//;</td></tr>
+<tr><td class="h">341</td><td><div class="c3">6</div></td><td></td><td></td><td></td><td><div>80</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$params-&gt;{&#39;directory&#39;} = File::Spec-&gt;catfile($module_dir, &#39;data&#39;);</td></tr>
 <tr><td class="h">342</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</td></tr>
 <tr><td class="h">343</td><td colspan="6"></td></tr><tr><td class="h">344</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# P3: -d fills the OS stat cache; -r _ reads it without a second syscall.</td></tr>
-<tr><td class="h">345</td><td><div class="c3">13</div></td><td><div class="c3" title="T/F"><a href="blib-lib-Genealogy-Wills-pm--branch.html#L345">100</a></div></td><td><div class="c0"><a href="blib-lib-Genealogy-Wills-pm--condition.html#L345">67</a></div></td><td></td><td><div>88</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;unless(-d $params-&gt;{&#39;directory&#39;} &amp;&amp; -r _) {</td></tr>
-<tr><td class="h">346</td><td><div class="c3">4</div></td><td></td><td></td><td></td><td><div>56</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Carp::carp(__PACKAGE__ . &#39;: &#39; . $params-&gt;{&#39;directory&#39;} . &#39; is not a directory&#39;);</td></tr>
-<tr><td class="h">347</td><td><div class="c3">4</div></td><td></td><td></td><td></td><td><div>689</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;</td></tr>
+<tr><td class="h">345</td><td><div class="c3">22</div></td><td><div class="c3" title="T/F"><a href="blib-lib-Genealogy-Wills-pm--branch.html#L345">100</a></div></td><td><div class="c0"><a href="blib-lib-Genealogy-Wills-pm--condition.html#L345">67</a></div></td><td></td><td><div>180</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;unless(-d $params-&gt;{&#39;directory&#39;} &amp;&amp; -r _) {</td></tr>
+<tr><td class="h">346</td><td><div class="c3">8</div></td><td></td><td></td><td></td><td><div>110</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Carp::carp(__PACKAGE__ . &#39;: &#39; . $params-&gt;{&#39;directory&#39;} . &#39; is not a directory&#39;);</td></tr>
+<tr><td class="h">347</td><td><div class="c3">8</div></td><td></td><td></td><td></td><td><div>1375</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;</td></tr>
 <tr><td class="h">348</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</td></tr>
-<tr><td class="h">349</td><td colspan="6"></td></tr><tr><td class="h">350</td><td><div class="c3">9</div></td><td><div class="c0" title="T/-"><a href="blib-lib-Genealogy-Wills-pm--branch.html#L350">50</a></div></td><td></td><td></td><td><div>11</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if(defined $params-&gt;{&#39;logger&#39;}) {</td></tr>
+<tr><td class="h">349</td><td colspan="6"></td></tr><tr><td class="h">350</td><td><div class="c3">14</div></td><td><div class="c0" title="T/-"><a href="blib-lib-Genealogy-Wills-pm--branch.html#L350">50</a></div></td><td></td><td></td><td><div>17</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if(defined $params-&gt;{&#39;logger&#39;}) {</td></tr>
 <tr><td class="h">351</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Modus Tollens: if the logger cannot satisfy required capabilities, reject now.</td></tr>
-<tr><td class="h">352</td><td><div class="c3">9</div></td><td></td><td></td><td></td><td><div>8</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;my $l = $params-&gt;{&#39;logger&#39;};</td></tr>
-<tr><td class="h">353</td><td><div class="c3">9</div></td><td><div class="c0" title="-/F"><a href="blib-lib-Genealogy-Wills-pm--branch.html#L353">50</a></div></td><td><div class="c0"><a href="blib-lib-Genealogy-Wills-pm--condition.html#L353">25</a></div></td><td></td><td><div>50</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Carp::croak(&#39;Logger must be an object with info() and error() methods&#39;)</td></tr>
+<tr><td class="h">352</td><td><div class="c3">14</div></td><td></td><td></td><td></td><td><div>10</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;my $l = $params-&gt;{&#39;logger&#39;};</td></tr>
+<tr><td class="h">353</td><td><div class="c3">14</div></td><td><div class="c0" title="-/F"><a href="blib-lib-Genealogy-Wills-pm--branch.html#L353">50</a></div></td><td><div class="c0"><a href="blib-lib-Genealogy-Wills-pm--condition.html#L353">25</a></div></td><td></td><td><div>67</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Carp::croak(&#39;Logger must be an object with info() and error() methods&#39;)</td></tr>
 <tr><td class="h">354</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;unless blessed($l) &amp;&amp; $l-&gt;can(&#39;info&#39;) &amp;&amp; $l-&gt;can(&#39;error&#39;);</td></tr>
 <tr><td class="h">355</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</td></tr>
 <tr><td class="h">356</td><td colspan="6"></td></tr><tr><td class="h">357</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# cache_duration defaults to the module constant; callers may override it.</td></tr>
 <tr><td class="h">358</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return bless {</td></tr>
 <tr><td class="h">359</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cache_duration =&gt; $DEFAULT_CACHE_DURATION,</td></tr>
-<tr><td class="h">360</td><td><div class="c3">9</div><div class="c3">9</div></td><td></td><td></td><td></td><td><div>10</div><div>26</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%{$params}</td></tr>
+<tr><td class="h">360</td><td><div class="c3">14</div><div class="c3">14</div></td><td></td><td></td><td></td><td><div>14</div><div>33</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%{$params}</td></tr>
 <tr><td class="h">361</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}, $class;</td></tr>
 <tr><td class="h">362</td><td></td><td></td><td></td><td></td><td></td><td class="s">}</td></tr>
 <tr><td class="h">363</td><td colspan="6"></td></tr><tr><td class="h">364 - 594</td><td colspan="5"></td><td class="s"><pre>=head2 search
@@ -605,10 +605,10 @@ A plain-English description of what C&lt;search()&gt; does, step by step:
 
 =cut</pre></td></tr>
 <tr><td class="h">595</td><td colspan="6"></td></tr><tr><td class="h">596</td><td></td><td></td><td></td><td></td><td></td><td class="s">sub search {</td></tr>
-<tr><td class="h">597</td><td><div class="c3">9</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L597">9</a></div></td><td><div>3705</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;my $self = shift;</td></tr>
-<tr><td class="h">598</td><td colspan="6"></td></tr><tr><td class="h">599</td><td><div class="c3">9</div></td><td><div class="c0" title="-/F"><a href="blib-lib-Genealogy-Wills-pm--branch.html#L599">50</a></div></td><td></td><td></td><td><div>15</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Carp::croak(&#39;search() must be called on an object&#39;) unless blessed($self);</td></tr>
-<tr><td class="h">600</td><td><div class="c3">9</div></td><td><div class="c3" title="T/F"><a href="blib-lib-Genealogy-Wills-pm--branch.html#L600">100</a></div></td><td></td><td></td><td><div>17</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Carp::croak(&#39;Usage: search({ last =&gt; $last_name })&#39;) unless @_;</td></tr>
-<tr><td class="h">601</td><td colspan="6"></td></tr><tr><td class="h">602</td><td><div class="c3">8</div></td><td></td><td></td><td></td><td><div>11</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;my $params = Params::Validate::Strict::validate_strict({</td></tr>
+<tr><td class="h">597</td><td><div class="c3">57</div></td><td></td><td></td><td><div class="c3"><a href="blib-lib-Genealogy-Wills-pm--subroutine.html#L597">57</a></div></td><td><div>48542</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;my $self = shift;</td></tr>
+<tr><td class="h">598</td><td colspan="6"></td></tr><tr><td class="h">599</td><td><div class="c3">57</div></td><td><div class="c3" title="T/F"><a href="blib-lib-Genealogy-Wills-pm--branch.html#L599">100</a></div></td><td></td><td></td><td><div>91</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Carp::croak(&#39;search() must be called on an object&#39;) unless blessed($self);</td></tr>
+<tr><td class="h">600</td><td><div class="c3">56</div></td><td><div class="c3" title="T/F"><a href="blib-lib-Genealogy-Wills-pm--branch.html#L600">100</a></div></td><td></td><td></td><td><div>67</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Carp::croak(&#39;Usage: search({ last =&gt; $last_name })&#39;) unless @_;</td></tr>
+<tr><td class="h">601</td><td colspan="6"></td></tr><tr><td class="h">602</td><td><div class="c3">54</div></td><td></td><td></td><td></td><td><div>64</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;my $params = Params::Validate::Strict::validate_strict({</td></tr>
 <tr><td class="h">603</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;args&nbsp;&nbsp;&nbsp;=&gt; Params::Get::get_params(&#39;last&#39;, @_),</td></tr>
 <tr><td class="h">604</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;schema =&gt; {</td></tr>
 <tr><td class="h">605</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#39;last&#39; =&gt; {</td></tr>
@@ -643,30 +643,30 @@ A plain-English description of what C&lt;search()&gt; does, step by step:
 <tr><td class="h">634</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</td></tr>
 <tr><td class="h">635</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</td></tr>
 <tr><td class="h">636</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;});</td></tr>
-<tr><td class="h">637</td><td colspan="6"></td></tr><tr><td class="h">638</td><td><div class="c3">6</div></td><td><div class="c0" title="-/F"><a href="blib-lib-Genealogy-Wills-pm--branch.html#L638">50</a></div></td><td><div class="c0"><a href="blib-lib-Genealogy-Wills-pm--condition.html#L638">50</a></div></td><td></td><td><div>1038</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;unless(length($params-&gt;{&#39;last&#39;} // &#39;&#39;)) {</td></tr>
+<tr><td class="h">637</td><td colspan="6"></td></tr><tr><td class="h">638</td><td><div class="c3">15</div></td><td><div class="c0" title="-/F"><a href="blib-lib-Genealogy-Wills-pm--branch.html#L638">50</a></div></td><td><div class="c0"><a href="blib-lib-Genealogy-Wills-pm--condition.html#L638">50</a></div></td><td></td><td><div>2667</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;unless(length($params-&gt;{&#39;last&#39;} // &#39;&#39;)) {</td></tr>
 <tr><td class="h">639</td><td><div class="c0">0</div></td><td></td><td></td><td></td><td><div>0</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Carp::carp(&quot;Value for &#39;last&#39; is mandatory&quot;);</td></tr>
 <tr><td class="h">640</td><td><div class="c0">0</div></td><td></td><td></td><td></td><td><div>0</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;</td></tr>
 <tr><td class="h">641</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</td></tr>
 <tr><td class="h">642</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# P4 (Transitive Reduction): PVS already enforced matches =&gt; qr/^[\w\-]+$/ above.</td></tr>
 <tr><td class="h">643</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Any value reaching this point is structurally valid; re-sanitization is a no-op.</td></tr>
-<tr><td class="h">644</td><td colspan="6"></td></tr><tr><td class="h">645</td><td><div class="c3">6</div><div class="c3">1</div></td><td></td><td><div class="c0"><a href="blib-lib-Genealogy-Wills-pm--condition.html#L645">67</a></div></td><td></td><td><div>15</div><div>5</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$self-&gt;{&#39;wills&#39;} ||= Genealogy::Wills::wills-&gt;new(no_entry =&gt; 1, no_fixate =&gt; 1, %{$self});</td></tr>
-<tr><td class="h">646</td><td colspan="6"></td></tr><tr><td class="h">647</td><td><div class="c3">6</div></td><td><div class="c0" title="-/F"><a href="blib-lib-Genealogy-Wills-pm--branch.html#L647">50</a></div></td><td></td><td></td><td><div>13</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Carp::croak(&quot;Can&#39;t open the wills database&quot;) unless defined($self-&gt;{&#39;wills&#39;});</td></tr>
-<tr><td class="h">648</td><td colspan="6"></td></tr><tr><td class="h">649</td><td><div class="c3">6</div></td><td><div class="c3" title="T/F"><a href="blib-lib-Genealogy-Wills-pm--branch.html#L649">100</a></div></td><td></td><td></td><td><div>7</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if(wantarray) {</td></tr>
+<tr><td class="h">644</td><td colspan="6"></td></tr><tr><td class="h">645</td><td><div class="c3">15</div><div class="c3">2</div></td><td></td><td><div class="c0"><a href="blib-lib-Genealogy-Wills-pm--condition.html#L645">67</a></div></td><td></td><td><div>34</div><div>14</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$self-&gt;{&#39;wills&#39;} ||= Genealogy::Wills::wills-&gt;new(no_entry =&gt; 1, no_fixate =&gt; 1, %{$self});</td></tr>
+<tr><td class="h">646</td><td colspan="6"></td></tr><tr><td class="h">647</td><td><div class="c3">15</div></td><td><div class="c0" title="-/F"><a href="blib-lib-Genealogy-Wills-pm--branch.html#L647">50</a></div></td><td></td><td></td><td><div>25</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Carp::croak(&quot;Can&#39;t open the wills database&quot;) unless defined($self-&gt;{&#39;wills&#39;});</td></tr>
+<tr><td class="h">648</td><td colspan="6"></td></tr><tr><td class="h">649</td><td><div class="c3">15</div></td><td><div class="c3" title="T/F"><a href="blib-lib-Genealogy-Wills-pm--branch.html#L649">100</a></div></td><td></td><td></td><td><div>15</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if(wantarray) {</td></tr>
 <tr><td class="h">650</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# P5: normalize to [] so the loop and return are unconditional;</td></tr>
 <tr><td class="h">651</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# eliminates a branch and makes the empty-result path explicit.</td></tr>
-<tr><td class="h">652</td><td><div class="c3">5</div></td><td></td><td><div class="c0"><a href="blib-lib-Genealogy-Wills-pm--condition.html#L652">50</a></div></td><td></td><td><div>12</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;my $wills = $self-&gt;{&#39;wills&#39;}-&gt;selectall_hashref($params) // [];</td></tr>
-<tr><td class="h">653</td><td><div class="c3">5</div><div class="c3">5</div></td><td></td><td></td><td></td><td><div>13</div><div>9</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$_-&gt;{&#39;url&#39;} = &#39;https://&#39; . $_-&gt;{&#39;url&#39;} for @{$wills};</td></tr>
-<tr><td class="h">654</td><td><div class="c3">5</div><div class="c3">5</div></td><td></td><td></td><td></td><td><div>3</div><div>8</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Data::Reuse::fixate(@{$wills});</td></tr>
-<tr><td class="h">655</td><td><div class="c3">5</div><div class="c3">5</div></td><td></td><td></td><td></td><td><div>303</div><div>8</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return @{$wills};</td></tr>
+<tr><td class="h">652</td><td><div class="c3">13</div></td><td></td><td><div class="c0"><a href="blib-lib-Genealogy-Wills-pm--condition.html#L652">50</a></div></td><td></td><td><div>16</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;my $wills = $self-&gt;{&#39;wills&#39;}-&gt;selectall_hashref($params) // [];</td></tr>
+<tr><td class="h">653</td><td><div class="c3">13</div><div class="c3">13</div></td><td></td><td></td><td></td><td><div>33</div><div>14</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$_-&gt;{&#39;url&#39;} = &#39;https://&#39; . $_-&gt;{&#39;url&#39;} for @{$wills};</td></tr>
+<tr><td class="h">654</td><td><div class="c3">13</div><div class="c3">13</div></td><td></td><td></td><td></td><td><div>10</div><div>38</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Data::Reuse::fixate(@{$wills});</td></tr>
+<tr><td class="h">655</td><td><div class="c3">13</div><div class="c3">13</div></td><td></td><td></td><td></td><td><div>568</div><div>25</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return @{$wills};</td></tr>
 <tr><td class="h">656</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</td></tr>
-<tr><td class="h">657</td><td><div class="c3">1</div></td><td><div class="c0" title="T/-"><a href="blib-lib-Genealogy-Wills-pm--branch.html#L657">50</a></div></td><td></td><td></td><td><div>2</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if(defined(my $will = $self-&gt;{&#39;wills&#39;}-&gt;fetchrow_hashref($params))) {</td></tr>
+<tr><td class="h">657</td><td><div class="c3">2</div></td><td><div class="c3" title="T/F"><a href="blib-lib-Genealogy-Wills-pm--branch.html#L657">100</a></div></td><td></td><td></td><td><div>4</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if(defined(my $will = $self-&gt;{&#39;wills&#39;}-&gt;fetchrow_hashref($params))) {</td></tr>
 <tr><td class="h">658</td><td><div class="c3">1</div></td><td></td><td></td><td></td><td><div>4</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$will-&gt;{&#39;url&#39;} = &#39;https://&#39; . $will-&gt;{&#39;url&#39;};</td></tr>
 <tr><td class="h">659</td><td><div class="c3">1</div><div class="c3">1</div></td><td></td><td></td><td></td><td><div>1</div><div>2</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Data::Reuse::fixate(%{$will});</td></tr>
-<tr><td class="h">660</td><td><div class="c3">1</div></td><td></td><td></td><td></td><td><div>45</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return Return::Set::set_return($will, { &#39;type&#39; =&gt; &#39;hashref&#39;, &#39;min&#39; =&gt; 1 });</td></tr>
+<tr><td class="h">660</td><td><div class="c3">1</div></td><td></td><td></td><td></td><td><div>46</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return Return::Set::set_return($will, { &#39;type&#39; =&gt; &#39;hashref&#39;, &#39;min&#39; =&gt; 1 });</td></tr>
 <tr><td class="h">661</td><td></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</td></tr>
-<tr><td class="h">662</td><td><div class="c0">0</div></td><td></td><td></td><td></td><td></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;</td></tr>
+<tr><td class="h">662</td><td><div class="c3">1</div></td><td></td><td></td><td></td><td><div>3</div></td><td class="s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;</td></tr>
 <tr><td class="h">663</td><td></td><td></td><td></td><td></td><td></td><td class="s">}</td></tr>
-<tr><td class="h">664</td><td colspan="6"></td></tr><tr><td class="h">665 - 963</td><td colspan="5"></td><td class="s"><pre>=head1 COMMON PITFALLS
+<tr><td class="h">664</td><td colspan="6"></td></tr><tr><td class="h">665 - 1075</td><td colspan="5"></td><td class="s"><pre>=head1 COMMON PITFALLS
 
 This section describes the most common mistakes when using this module.
 Read it before reporting a bug.
@@ -796,10 +796,122 @@ Searches are exact-match on the columns provided. There is no fuzzy or
 phonetic matching (e.g. Soundex, Levenshtein distance). Wildcard support
 depends on the C&lt;Database::Abstraction&gt; layer.
 
+=item * B&lt;The C&lt;logger&gt; argument is silently discarded.&gt;
+
+C&lt;Object::Configure&gt; always supplies its own C&lt;Log::Abstraction&gt; logger.
+Any object passed as C&lt;logger&gt; to C&lt;new()&gt; is replaced before it is stored.
+See the L&lt;/SECURITY&gt; section, Finding 3.
+
 =item * B&lt;Single database source.&gt;
 
 The data comes from a single scraped source (the Kent Wills Transcript). It
 does not cover wills from other counties or archives.
+
+=back
+
+=head1 SECURITY
+
+This section documents the attack surface of the module, the controls in
+place, and known open findings. It is intended for developers integrating
+this module into a web application or CGI script.
+
+=head2 Attack surface summary
+
+The module has two entry points: C&lt;new()&gt; and C&lt;search()&gt;. Neither reads
+from C&lt;%ENV&gt;, C&lt;STDIN&gt;, or any HTTP source directly. In a CGI context,
+the calling script is responsible for parsing HTTP inputs before passing
+them to this module.
+
+=head2 Controls in place
+
+=over 4
+
+=item * C&lt;last&gt; is strictly validated
+
+C&lt;Params::Validate::Strict&gt; enforces C&lt;matches =E&lt;gt&gt; qr/^[\w\-]+$/&gt; on
+the C&lt;last&gt; argument before any database call. This blocks SQL injection,
+XSS, shell metacharacters, CRLF sequences, and null bytes for that field.
+
+=item * C&lt;year&gt; is range-validated as an integer
+
+C&lt;Params::Validate::Strict&gt; enforces C&lt;type =E&lt;gt&gt; &#39;integer&#39;&gt;, C&lt;min =E&lt;gt&gt; 1&gt;,
+and C&lt;max =E&lt;gt&gt; MAX_WILL_YEAR&gt;. Non-integer strings, floats, and
+out-of-range values are all rejected before DB access.
+
+=item * Directory and config-file paths are checked before use
+
+C&lt;new()&gt; verifies C&lt;-d $dir &amp;&amp; -r _&gt; for the data directory and C&lt;-r&gt;
+for any C&lt;config_file&gt;. Paths that do not pass these checks cause C&lt;new()&gt;
+to return C&lt;undef&gt; (with a warning) or croak immediately.
+
+=item * Logger injection is blocked by Object::Configure
+
+C&lt;Object::Configure::configure()&gt; always replaces the caller-supplied
+C&lt;logger&gt; argument with its own C&lt;Log::Abstraction&gt; object, regardless
+of what was passed. A hostile logger (missing methods, wrong type, or
+carrying malicious extra methods) is discarded before any logging call
+occurs. The module-level interface check C&lt;(blessed &amp;&amp; can &#39;info&#39; &amp;&amp; can &#39;error&#39;)&gt;
+runs against the C&lt;Object::Configure&gt;-supplied logger, which always passes.
+
+=item * No shell operations
+
+The module performs no C&lt;system()&gt;, C&lt;exec()&gt;, backtick, or
+C&lt;open(FH, &quot;...|&quot;)&gt; calls. Shell metacharacters in any field pose no
+command-injection risk within this module.
+
+=item * Database access is parameterised
+
+All SQL is executed via C&lt;Database::Abstraction&gt; (v0.37+), which uses
+DBI prepared statements. Values are bound as parameters, not interpolated
+into SQL strings.
+
+=back
+
+=head2 Known findings
+
+=over 4
+
+=item * B&lt;Finding 1: C&lt;first&gt;, C&lt;middle&gt;, C&lt;town&gt; have no character-set constraint&gt;
+
+These optional fields are validated for type (string) and length (1-100)
+only. SQL injection characters such as C&lt;&#39;&gt;, C&lt;;&gt;, C&lt;--&gt;, and C&lt;UNION&gt;
+pass C&lt;Params::Validate::Strict&gt; for these fields and are forwarded to
+the database layer verbatim.
+
+B&lt;Current mitigation&gt;: C&lt;Database::Abstraction&gt; uses DBI parameterised
+queries, so the values are bound safely regardless of their content.
+
+B&lt;Recommended defence-in-depth&gt;: add C&lt;matches&gt; constraints to the schema
+for these fields, for example C&lt;qr/^[\w\s\-,.]+$/&gt;.
+
+B&lt;Test coverage&gt;: C&lt;t/cgi_security.t&gt;, section 10.
+
+=item * B&lt;Finding 2: C&lt;matches =E&lt;gt&gt; qr/^[\w\-]+$/&gt; accepts Unicode word characters&gt;
+
+The C&lt;\w&gt; class in a Perl regular expression matches Unicode word characters
+(including Cyrillic, Greek, Hebrew, etc.) when the input string carries the
+UTF-8 flag. Without the C&lt;/a&gt; modifier, a Cyrillic string such as
+C&lt;&quot;\x{0430}mith&quot;&gt; passes the C&lt;last&gt; validation constraint.
+
+This is only a concern if strict ASCII-only last names are required. The
+data in the bundled database contains only ASCII names, so a Unicode
+homograph query would return zero results (safe, but unexpected).
+
+B&lt;Recommended fix&gt;: change the C&lt;matches&gt; value to C&lt;qr/^[\w\-]+$/a&gt; to
+restrict C&lt;\w&gt; to ASCII C&lt;[0-9A-Za-z_]&gt;.
+
+B&lt;Test coverage&gt;: C&lt;t/cgi_security.t&gt;, section 19.
+
+=item * B&lt;Finding 3: caller-supplied logger is silently discarded&gt;
+
+C&lt;Object::Configure&gt; always replaces the C&lt;logger&gt; argument with a
+C&lt;Log::Abstraction&gt; instance. A caller who passes a custom logger (for
+example, a C&lt;Log::Log4perl&gt; object) will find it silently ignored. The
+POD documents this parameter, but its effect is a no-op.
+
+B&lt;Impact&gt;: this is a usability limitation, not a security risk.
+
+B&lt;Test coverage&gt;: C&lt;t/cgi_security.t&gt;, section 15.
 
 =back
 
@@ -965,7 +1077,7 @@ Usage is subject to the GPL2 licence terms.
 If you use it, please let me know.
 
 =cut</pre></td></tr>
-<tr><td class="h">964</td><td colspan="6"></td></tr><tr><td class="h">965</td><td></td><td></td><td></td><td></td><td></td><td class="s">1;</td></tr>
+<tr><td class="h">1076</td><td colspan="6"></td></tr><tr><td class="h">1077</td><td></td><td></td><td></td><td></td><td></td><td class="s">1;</td></tr>
 </table>
 </body>
 </html>
