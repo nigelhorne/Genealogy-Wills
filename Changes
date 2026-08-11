@@ -2,6 +2,27 @@ Revision history for Genealogy::Wills
 
 0.11
 	[ Enhancements ]
+	- Regex audit: lib/Genealogy/Wills.pm: $MODULE_DATA_DIR s/\.pm$// → s/\.pm\z// (strict
+	  end-of-string; $ matches before trailing \n, \z does not)
+	- Regex audit: lib/Genealogy/Wills.pm: $SEARCH_SCHEMA matches qr/^[\w\-]+$/ → qr/^[\w-]+\z/a:
+	  \z for strict eos; idiomatic unescaped [-] at end of character class; /a restricts \w
+	  to ASCII [0-9A-Za-z_] blocking Unicode homograph queries (Finding 2 applied)
+	- Regex audit: bin/create_db.PL: replace $line =~ /Created by/ with index() for O(1)
+	  literal substring check (avoids regex engine startup cost per line)
+	- Regex audit: bin/create_db.PL: rewrite main HTML parsing regex with /x modifier and
+	  negated character classes: [^"]+ for href (URL cannot contain "), [^,<>]+ for last
+	  name (bounded by comma delimiter), [^<]+? non-greedy for first name (terminates at
+	  </a>), .+? non-greedy for town (year anchor stops correctly) — eliminates ReDoS
+	  from greedy (.+) groups that could backtrack catastrophically on malformed input
+	- Regex audit: bin/create_db.PL: Alias regex /(.+)\sAlias\s(.+)/ → /\A(.+?)\s+Alias\s+(.+)\z/x:
+	  anchored; non-greedy first group splits on FIRST Alias; \s+ tolerates multi-space
+	- Regex audit: bin/create_db.PL: slash alias regex /(.+)\/(.+)/ → /\A([^\/]+)\/(.+)\z/x:
+	  [^/]+ for first part (no backtracking possible; alias cannot contain /); anchored
+	- Regex audit: bin/create_db.PL: town "next" regex /(.*) next (.*?)/i → /x multiline
+	  with .+ (not .*) requiring non-empty place names; \s+ around "next" for robustness
+	- Regex audit: bin/create_db.PL: first/middle split /^(.+?)\s(.+)$/ → /^(\S+)\s+(.+)\z/:
+	  \S+ (non-whitespace) for first-name token avoids backtracking; \s+ handles double-
+	  spaced input; \z is strictly end-of-string
 	- Bump minimum versions
 	- Added the test dashboard
 	- Modernize Genealogy::Wills.pm: use autodie, explicit Scalar::Util import, simplified

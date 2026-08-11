@@ -46,7 +46,7 @@ Readonly my $MAX_WILL_YEAR => (localtime)[5] + 1900;
 # %INC and allocates a Module::Info object on every new() call that omits
 # 'directory'. Computing it here gives zero per-call overhead.
 my $MODULE_DATA_DIR = do {
-	(my $dir = __FILE__) =~ s/\.pm$//;
+	(my $dir = __FILE__) =~ s/\.pm\z//;
 	File::Spec->catfile($dir, 'data');
 };
 
@@ -58,7 +58,10 @@ my $SEARCH_SCHEMA = {
 		type    => 'string',
 		min     => $MIN_LAST_NAME_LENGTH,
 		max     => $MAX_LAST_NAME_LENGTH,
-		matches => qr/^[\w\-]+$/
+		# \z = strict end-of-string (not before \n); [-] at end = unambiguous literal
+		# hyphen without escaping; /a = restrict \w to ASCII [0-9A-Za-z_], blocking
+		# Unicode homograph queries (Cyrillic "Smith" silently returning zero results).
+		matches => qr/^[\w-]+\z/a
 	},
 	'first' => {
 		type     => 'string',
@@ -527,7 +530,7 @@ C<year>, C<url>.
     schema => {
         last   => { type => 'string',
                     min  => 1, max => 100,
-                    matches => qr/^[\w-]+$/ },
+                    matches => qr/^[\w-]+\z/a },
         first  => { type => 'string',
                     min  => 1, max => 100,
                     optional => 1 },
@@ -614,7 +617,7 @@ A plain-English description of what C<search()> does, step by step:
        nothing (an empty list or undef, depending on context).
 
     6. (Removed: sanitization was a no-op. Validation in step 4 already
-       enforces [\w-] only via PVS matches => qr/^[\w\-]+$/.)
+       enforces [\w-] only via PVS matches => qr/^[\w-]+\z/a.)
 
     7. If this is the first search() call on this object, open the SQLite
        database. Reuse the existing connection on subsequent calls.
@@ -652,7 +655,7 @@ sub search {
 		Carp::carp("Value for 'last' is mandatory");
 		return;
 	}
-	# P4 (Transitive Reduction): PVS already enforced matches => qr/^[\w\-]+$/ above.
+	# P4 (Transitive Reduction): PVS already enforced matches => qr/^[\w-]+\z/a above.
 	# Any value reaching this point is structurally valid; re-sanitization is a no-op.
 
 	$self->{'wills'} ||= Genealogy::Wills::wills->new(no_entry => 1, no_fixate => 1, %{$self});
@@ -837,9 +840,12 @@ them to this module.
 
 =item * C<last> is strictly validated
 
-C<Params::Validate::Strict> enforces C<matches =E<gt> qr/^[\w\-]+$/> on
+C<Params::Validate::Strict> enforces C<matches =E<gt> qr/^[\w-]+\z/a> on
 the C<last> argument before any database call. This blocks SQL injection,
 XSS, shell metacharacters, CRLF sequences, and null bytes for that field.
+The C</a> modifier restricts C<\w> to ASCII C<[0-9A-Za-z_]>, blocking
+Unicode homograph queries. The C<\z> anchor is strictly end-of-string,
+unlike C<$> which matches before a trailing newline.
 
 =item * C<year> is range-validated as an integer
 
@@ -895,19 +901,20 @@ for these fields, for example C<qr/^[\w\s\-,.]+$/>.
 
 B<Test coverage>: C<t/cgi_security.t>, section 10.
 
-=item * B<Finding 2: C<matches =E<gt> qr/^[\w\-]+$/> accepts Unicode word characters>
+=item * B<Finding 2 (fixed): C<matches =E<gt> qr/^[\w-]+\z/a> — Unicode and trailing-newline issues resolved>
 
-The C<\w> class in a Perl regular expression matches Unicode word characters
-(including Cyrillic, Greek, Hebrew, etc.) when the input string carries the
-UTF-8 flag. Without the C</a> modifier, a Cyrillic string such as
-C<"\x{0430}mith"> passes the C<last> validation constraint.
+The C<\w> class without C</a> matched Unicode word characters (Cyrillic,
+Greek, Hebrew, etc.), allowing a homograph query such as C<"\x{0430}mith">
+to pass validation silently (returning zero results, not an error).
 
-This is only a concern if strict ASCII-only last names are required. The
-data in the bundled database contains only ASCII names, so a Unicode
-homograph query would return zero results (safe, but unexpected).
+Additionally, the former C<$> anchor matches before a trailing C<\n>,
+meaning C<"Smith\n"> would have passed the pattern.
 
-B<Recommended fix>: change the C<matches> value to C<qr/^[\w\-]+$/a> to
-restrict C<\w> to ASCII C<[0-9A-Za-z_]>.
+B<Applied fix>: the schema now uses C<qr/^[\w-]+\z/a>: C</a> restricts
+C<\w> to ASCII C<[0-9A-Za-z_]>, and C<\z> anchors to the absolute
+end-of-string with no C<\n> exception. The C<\-> escape inside C<[]>
+has also been normalised to the idiomatic unescaped C<-> at the end
+of the character class.
 
 B<Test coverage>: C<t/cgi_security.t>, section 19.
 

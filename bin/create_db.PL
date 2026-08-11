@@ -139,9 +139,26 @@ sub mrawson {
 	# faster than the /$/ms regex which re-evaluates $ anchors per character.
 	for my $line (split /\n/, $data) {
 		# LAST NAME, First Name; Place of Death; Newspaper date
-		return if($line =~ /Created by/);
+		# index() is faster than regex for a pure literal substring check.
+		return if index($line, 'Created by') >= 0;
 
-		next unless($line =~ /^\s*<li><a href="(.+)">(.+),\s+(.+)\s+<\/a> of (.+) (\d{4})/);
+		# Negated character classes prevent catastrophic backtracking that
+		# greedy (.+) groups cause when the delimiter chars appear in the input.
+		# The original (.+) for href could match " (allowing multi-pass backtrack);
+		# [^"]+ is O(N) and semantically precise: URL values cannot contain ".
+		# m{} delimiter used instead of // so that unescaped / may appear in
+		# the pattern body and comments (e.g. </a>) without terminating the regex.
+		next unless $line =~ m{
+			^\s*<li><a\s+href="
+			( [^"]+ )           # $1: relative URL - no unescaped " in href values
+			">
+			( [^,<>]+ )         # $2: last name - bounded by comma; no angle-brackets
+			,\s+
+			( [^<]+? )          # $3: first name - non-greedy; terminates before </a>
+			\s+</a>\s+of\s+
+			( .+? )             # $4: town - non-greedy; year anchor stops it correctly
+			\s( \d{4} )         # $5: year - exactly 4 decimal digits; \s = separator
+		}x;
 		my ($page, $last, $first, $town, $year) = ($1, normalise_name($2), normalise_name($3), $4, $5);
 
 		queue("freepages.rootsweb.com/~mrawson/genealogy/$page", $first, $last, "$town, Kent, England", $year);
@@ -158,19 +175,32 @@ sub queue {
 		year  => $year
 	};
 
-	# TODO: combine these into one regex
-	if($last =~ /(.+)\sAlias\s(.+)/) {
+	# Anchors (\A..\z) prevent substring match drift on multi-word names.
+	# Non-greedy (.+?) for the first group splits on the FIRST keyword occurrence
+	# (greedy would split on the last, giving wrong primary/alias assignment).
+	# \s+ tolerates multiple spaces around the keyword (older typesetting).
+	if($last =~ / \A (.+?) \s+ Alias \s+ (.+) \z /x) {
 		push @queue, { %{$columns}, last => $1 };
 		$last = $2;
-	} elsif($last =~ /(.+)\/(.+)/) {
+	} elsif($last =~ m{ \A ( [^/]+ ) / (.+) \z }x) {
+		# [^/]+ for $1 avoids backtracking: the alias before the first slash
+		# cannot itself contain a slash, so no ambiguity in where to split.
 		push @queue, { %{$columns}, last => $1 };
 		$last = $2;
 	}
 
 	$columns->{'last'} = $last;
 
-	# Handle "Ash next Sandwich" by adding both Ash and Sandwich as well
-	if($town =~ /^(.*) next (.*?),\s+(.*)/i) {
+	# Handle "Ash next Sandwich" by adding both Ash and Sandwich as well.
+	# .+ (not .*) requires at least one char per group — an empty place name is
+	# meaningless. \s+ around "next" tolerates irregular whitespace in the source.
+	if($town =~ m{
+		^ ( .+ )        # $1: primary town (greedy; matches up to last "next" keyword)
+		\s+ next \s+    # "next" with flexible surrounding whitespace
+		( .+? )         # $2: secondary town (non-greedy; stops at comma)
+		, \s+
+		( .+ )          # $3: county/country suffix (county, country)
+	}xi) {
 		push @queue, $columns;
 		push @queue, { %{$columns}, town => "$1, $3" };
 		push @queue, { %{$columns}, town => "$1, $2, $3" };
@@ -200,7 +230,10 @@ sub flush {
 
 	for my $row (@deduped) {
 		my ($first, $middle);
-		if($row->{'first'} =~ /^(.+?)\s(.+)$/) {
+		# \S+ (non-whitespace) for the first token is more precise than .+? and
+		# avoids any backtracking. \s+ handles double-spaced entries. \z is
+		# strictly end-of-string; $ would match before a trailing newline.
+		if($row->{'first'} =~ /^(\S+)\s+(.+)\z/) {
 			($first, $middle) = ($1, $2);
 		} else {
 			$first = $row->{'first'};
