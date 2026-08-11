@@ -17,6 +17,7 @@ use Params::Get 0.16;
 use Params::Validate::Strict 0.37;
 use Return::Set 0.05;
 use Scalar::Util qw(blessed);
+use Sub::Protected 0.02;
 
 =encoding utf-8
 
@@ -649,10 +650,15 @@ sub search {
 	Carp::croak('Usage: search({ last => $last_name })') unless @_;
 
 	# $SEARCH_SCHEMA is the module-level constant; no per-call allocation.
-	my $params = Params::Validate::Strict::validate_strict({
-		args   => Params::Get::get_params('last', @_),
-		schema => $SEARCH_SCHEMA,
-	});
+	# local $@ guards against Params::Validate::Strict's internal eval() calls
+	# resetting the caller's $@ to '' on a successful validation pass.
+	my $params = do {
+		local $@;
+		Params::Validate::Strict::validate_strict({
+			args   => Params::Get::get_params('last', @_),
+			schema => $SEARCH_SCHEMA,
+		});
+	};
 
 	unless(length($params->{'last'} // '')) {
 		Carp::carp("Value for 'last' is mandatory");
@@ -682,7 +688,7 @@ sub search {
 # Entry: $will -- a hashref row from the DB layer (url stored without scheme)
 # Side effects: mutates $will->{'url'} in place; interns all string values via fixate
 # Exit: returns $will (same ref) for chaining
-sub _decorate_will {
+sub _decorate_will :Protected {
 	my $will = shift;
 	$will->{'url'} = 'https://' . $will->{'url'};
 	Data::Reuse::fixate(%{$will});
@@ -800,15 +806,6 @@ C<Genealogy::Wills::new('Smith')> shifts C<'Smith'> into C<$class> and
 attempts to bless into it. Only the no-argument form
 C<Genealogy::Wills::new()> is partially handled (it defaults to
 C<__PACKAGE__>). Always use the arrow form: C<< Genealogy::Wills->new() >>.
-
-=item * B<Private methods are unenforced.>
-
-C<_decorate_will> is an internal helper marked private by naming convention
-(C<_> prefix). It is not annotated with C<Sub::Private> (C<:Private> attribute)
-because C<Sub::Private> uses a C<CHECK> block that fires C<"Too late to run CHECK
-block"> warnings when the module is loaded via a dependency chain at runtime in
-test harnesses. Subclass-only helpers should use C<Sub::Protected> if added in
-future.
 
 =item * B<Year upper bound is capped at load time.>
 

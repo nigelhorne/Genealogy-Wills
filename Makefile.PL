@@ -52,7 +52,8 @@ my $prereqs = {
 	'Params::Validate::Strict' => 0.37,
 	'Readonly' => 0,
 	'Return::Set' => 0.05,
-	'Scalar::Util' => 0
+	'Scalar::Util' => 0,
+	'Sub::Protected' => 0
 };
 
 unless(defined($ENV{'AUTOMATED_TESTING'})) {

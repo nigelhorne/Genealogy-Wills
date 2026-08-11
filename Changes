@@ -81,6 +81,10 @@ Revision history for Genealogy::Wills
 	  identical two-line body (push @queue + $last=$2); now captures ($alt, $primary)
 	  in the pattern-match phase and executes the shared action once
 	[ Bug Fixes ]
+	- lib/Genealogy/Wills.pm: fix $@ clobber bug: Params::Validate::Strict uses
+	  eval internally and resets $@ to '' on successful validation. Added
+	  local $@ in a do-block around the validate_strict() call in search() so
+	  the caller's $@ is preserved. Revealed by t/unit.t global-state integrity test.
 	- lib/Genealogy/Wills.pm: fix dead-code bug where the logger validation check
 	  (blessed && can 'info' && can 'error') ran AFTER Object::Configure::configure(),
 	  which always replaces the caller's logger before the check ran. Moved validation
