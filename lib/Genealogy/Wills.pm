@@ -41,7 +41,7 @@ Readonly my $MAX_LAST_NAME_LENGTH   => 100;
 # redeployment. See LIMITATIONS for the year-boundary edge case.
 Readonly my $MAX_WILL_YEAR => (localtime)[5] + 1900;
 
-# P1: __FILE__ is resolved by the compiler; this never changes at runtime.
+# __FILE__ is resolved by the compiler; this never changes at runtime.
 # Replaces Module::Info->new_from_loaded(__PACKAGE__)->file() which scans
 # %INC and allocates a Module::Info object on every new() call that omits
 # 'directory'. Computing it here gives zero per-call overhead.
@@ -50,7 +50,14 @@ my $MODULE_DATA_DIR = do {
 	File::Spec->catfile($dir, 'data');
 };
 
-# P2: The PVS schema is static. Allocating it once here avoids creating
+# Shared templates for the three optional free-text fields (first, middle, town).
+# Extracted to eliminate three copies of { type => 'string', optional => 1,
+# min => 1, max => 100 } and two copies of the name character-class regex.
+my %_FIELD_BASE  = (type => 'string', optional => 1, min => 1, max => 100);
+my $_OPT_NAME_RE = qr/^[\w '.-]+\z/;   # word chars, space, apostrophe (O'Brien), period, hyphen
+my $_OPT_TOWN_RE = qr/^[\w ',.-]+\z/;  # same + comma for "Town, County, Country" format
+
+# The PVS schema is static. Allocating it once here avoids creating
 # 6 anonymous hashrefs (the outer schema + 5 field specs) on every search()
 # call. At 1000 searches/sec that eliminates 6000 transient allocations/sec.
 my $SEARCH_SCHEMA = {
@@ -63,34 +70,14 @@ my $SEARCH_SCHEMA = {
 		# Unicode homograph queries (Cyrillic "Smith" silently returning zero results).
 		matches => qr/^[\w-]+\z/a
 	},
-	'first' => {
-		type     => 'string',
-		optional => 1,
-		min      => 1,
-		max      => 100,
-		# Allows: word chars (Unicode \w), space, apostrophe (O'Brien),
-		# period (St. John), hyphen (Mary-Anne).
-		# Blocks: ; = | & < > \r \n \0 ` and other injection metacharacters.
-		# Primary SQL injection defence is parameterised queries; this adds
-		# defence-in-depth by rejecting obvious metacharacters before DB access.
-		matches  => qr/^[\w '.-]+\z/
-	},
-	'middle' => {
-		type     => 'string',
-		optional => 1,
-		min      => 1,
-		max      => 100,
-		matches  => qr/^[\w '.-]+\z/
-	},
-	'town' => {
-		type     => 'string',
-		optional => 1,
-		min      => 1,
-		max      => 100,
-		# Town format: "Canterbury, Kent, England" -- comma added to first/middle set.
-		matches  => qr/^[\w ',.-]+\z/
-	},
-	'year' => {
+	# Defence-in-depth: matches constraints reject injection metacharacters before
+	# reaching the DB layer. Primary defence is parameterised queries (Database::Abstraction).
+	# Allows: word chars (Unicode \w), space, apostrophe (O'Brien), period (St. John), hyphen.
+	# Blocks: ; = | & < > \r \n \0 ` and other shell/SQL injection metacharacters.
+	'first'  => { %_FIELD_BASE, matches => $_OPT_NAME_RE },
+	'middle' => { %_FIELD_BASE, matches => $_OPT_NAME_RE },
+	'town'   => { %_FIELD_BASE, matches => $_OPT_TOWN_RE },  # adds comma for "Town, County"
+	'year'   => {
 		type     => 'integer',
 		optional => 1,
 		min      => 1,
@@ -391,10 +378,10 @@ sub new {
 	}
 	$params = Object::Configure::configure($class, $params);
 
-	# P1: use the compile-time constant; no %INC scan, no object allocation.
+	# use the compile-time constant; no %INC scan, no object allocation.
 	$params->{'directory'} //= $MODULE_DATA_DIR;
 
-	# P3: -d fills the OS stat cache; -r _ reads it without a second syscall.
+	# -d fills the OS stat cache; -r _ reads it without a second syscall.
 	unless(-d $params->{'directory'} && -r _) {
 		Carp::carp(__PACKAGE__ . ': ' . $params->{'directory'} . ' is not a directory');
 		return;
@@ -654,7 +641,7 @@ sub search {
 	Carp::croak('search() must be called on an object') unless blessed($self);
 	Carp::croak('Usage: search({ last => $last_name })') unless @_;
 
-	# P2: $SEARCH_SCHEMA is the module-level constant; no per-call allocation.
+	# $SEARCH_SCHEMA is the module-level constant; no per-call allocation.
 	my $params = Params::Validate::Strict::validate_strict({
 		args   => Params::Get::get_params('last', @_),
 		schema => $SEARCH_SCHEMA,
@@ -664,7 +651,7 @@ sub search {
 		Carp::carp("Value for 'last' is mandatory");
 		return;
 	}
-	# P4 (Transitive Reduction): PVS already enforced matches => qr/^[\w-]+\z/a above.
+	# (Transitive Reduction): PVS already enforced matches => qr/^[\w-]+\z/a above.
 	# Any value reaching this point is structurally valid; re-sanitization is a no-op.
 
 	$self->{'wills'} ||= Genealogy::Wills::wills->new(no_entry => 1, no_fixate => 1, %{$self});
@@ -672,19 +659,27 @@ sub search {
 	Carp::croak("Can't open the wills database") unless defined($self->{'wills'});
 
 	if(wantarray) {
-		# P5: normalize to [] so the loop and return are unconditional;
+		# normalize to [] so the loop and return are unconditional;
 		# eliminates a branch and makes the empty-result path explicit.
 		my $wills = $self->{'wills'}->selectall_hashref($params) // [];
-		$_->{'url'} = 'https://' . $_->{'url'} for @{$wills};
-		Data::Reuse::fixate(@{$wills});
+		_decorate_will($_) for @{$wills};
 		return @{$wills};
 	}
 	if(defined(my $will = $self->{'wills'}->fetchrow_hashref($params))) {
-		$will->{'url'} = 'https://' . $will->{'url'};
-		Data::Reuse::fixate(%{$will});
-		return Return::Set::set_return($will, { 'type' => 'hashref', 'min' => 1 });
+		return Return::Set::set_return(_decorate_will($will), { 'type' => 'hashref', 'min' => 1 });
 	}
 	return;
+}
+
+# _decorate_will -- prepend the https:// scheme to a DB result and intern its strings.
+# Entry: $will -- a hashref row from the DB layer (url stored without scheme)
+# Side effects: mutates $will->{'url'} in place; interns all string values via fixate
+# Exit: returns $will (same ref) for chaining
+sub _decorate_will {
+	my $will = shift;
+	$will->{'url'} = 'https://' . $will->{'url'};
+	Data::Reuse::fixate(%{$will});
+	return $will;
 }
 
 =head1 COMMON PITFALLS
@@ -801,9 +796,12 @@ C<__PACKAGE__>). Always use the arrow form: C<< Genealogy::Wills->new() >>.
 
 =item * B<Private methods are unenforced.>
 
-There are currently no private helper methods. If internal helpers are added
-they should be marked with C<Sub::Private> (C<:Private> attribute) to prevent
-accidental external use, and C<Sub::Protected> for subclass-only methods.
+C<_decorate_will> is an internal helper marked private by naming convention
+(C<_> prefix). It is not annotated with C<Sub::Private> (C<:Private> attribute)
+because C<Sub::Private> uses a C<CHECK> block that fires C<"Too late to run CHECK
+block"> warnings when the module is loaded via a dependency chain at runtime in
+test harnesses. Subclass-only helpers should use C<Sub::Protected> if added in
+future.
 
 =item * B<Year upper bound is capped at load time.>
 

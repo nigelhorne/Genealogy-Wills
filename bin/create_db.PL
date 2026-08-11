@@ -147,7 +147,7 @@ sub mrawson {
 
 	$data =~ s/\r//g;
 
-	# P4: for-loop over split avoids the shift-while idiom; split on \n is
+	# for-loop over split avoids the shift-while idiom; split on \n is
 	# faster than the /$/ms regex which re-evaluates $ anchors per character.
 	for my $line (split /\n/, $data) {
 		# LAST NAME, First Name; Place of Death; Newspaper date
@@ -187,18 +187,22 @@ sub queue {
 		year  => $year
 	};
 
+	# Both the Alias and / variants push an alternate-spelling entry then update $last.
+	# The two-branch if/elsif had an identical body -- capture both matches into
+	# ($alt, $primary), then execute the shared action once to eliminate the duplication.
 	# Anchors (\A..\z) prevent substring match drift on multi-word names.
-	# Non-greedy (.+?) for the first group splits on the FIRST keyword occurrence
-	# (greedy would split on the last, giving wrong primary/alias assignment).
+	# Non-greedy (.+?) splits on the FIRST Alias keyword (greedy would use the last).
 	# \s+ tolerates multiple spaces around the keyword (older typesetting).
+	# [^/]+ for the slash variant avoids backtracking (alias cannot itself contain /).
+	my ($alt, $primary);
 	if($last =~ / \A (.+?) \s+ Alias \s+ (.+) \z /x) {
-		push @queue, { %{$columns}, last => $1 };
-		$last = $2;
+		($alt, $primary) = ($1, $2);
 	} elsif($last =~ m{ \A ( [^/]+ ) / (.+) \z }x) {
-		# [^/]+ for $1 avoids backtracking: the alias before the first slash
-		# cannot itself contain a slash, so no ambiguity in where to split.
-		push @queue, { %{$columns}, last => $1 };
-		$last = $2;
+		($alt, $primary) = ($1, $2);
+	}
+	if(defined $alt) {
+		push @queue, { %{$columns}, last => $alt };
+		$last = $primary;
 	}
 
 	$columns->{'last'} = $last;
@@ -234,7 +238,7 @@ sub flush {
 		push @deduped, $item unless $seen{$k}++;
 	}
 
-	# P3: prepare_cached reuses the compiled statement plan across flush() calls
+	# prepare_cached reuses the compiled statement plan across flush() calls
 	# rather than re-parsing the INSERT SQL each time.
 	my $sth = $dbh->prepare_cached(
 		'INSERT INTO wills(first, middle, last, town, year, url) VALUES (?, ?, ?, ?, ?, ?)'
