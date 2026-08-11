@@ -792,10 +792,122 @@ Searches are exact-match on the columns provided. There is no fuzzy or
 phonetic matching (e.g. Soundex, Levenshtein distance). Wildcard support
 depends on the C<Database::Abstraction> layer.
 
+=item * B<The C<logger> argument is silently discarded.>
+
+C<Object::Configure> always supplies its own C<Log::Abstraction> logger.
+Any object passed as C<logger> to C<new()> is replaced before it is stored.
+See the L</SECURITY> section, Finding 3.
+
 =item * B<Single database source.>
 
 The data comes from a single scraped source (the Kent Wills Transcript). It
 does not cover wills from other counties or archives.
+
+=back
+
+=head1 SECURITY
+
+This section documents the attack surface of the module, the controls in
+place, and known open findings. It is intended for developers integrating
+this module into a web application or CGI script.
+
+=head2 Attack surface summary
+
+The module has two entry points: C<new()> and C<search()>. Neither reads
+from C<%ENV>, C<STDIN>, or any HTTP source directly. In a CGI context,
+the calling script is responsible for parsing HTTP inputs before passing
+them to this module.
+
+=head2 Controls in place
+
+=over 4
+
+=item * C<last> is strictly validated
+
+C<Params::Validate::Strict> enforces C<matches =E<gt> qr/^[\w\-]+$/> on
+the C<last> argument before any database call. This blocks SQL injection,
+XSS, shell metacharacters, CRLF sequences, and null bytes for that field.
+
+=item * C<year> is range-validated as an integer
+
+C<Params::Validate::Strict> enforces C<type =E<gt> 'integer'>, C<min =E<gt> 1>,
+and C<max =E<gt> MAX_WILL_YEAR>. Non-integer strings, floats, and
+out-of-range values are all rejected before DB access.
+
+=item * Directory and config-file paths are checked before use
+
+C<new()> verifies C<-d $dir && -r _> for the data directory and C<-r>
+for any C<config_file>. Paths that do not pass these checks cause C<new()>
+to return C<undef> (with a warning) or croak immediately.
+
+=item * Logger injection is blocked by Object::Configure
+
+C<Object::Configure::configure()> always replaces the caller-supplied
+C<logger> argument with its own C<Log::Abstraction> object, regardless
+of what was passed. A hostile logger (missing methods, wrong type, or
+carrying malicious extra methods) is discarded before any logging call
+occurs. The module-level interface check C<(blessed && can 'info' && can 'error')>
+runs against the C<Object::Configure>-supplied logger, which always passes.
+
+=item * No shell operations
+
+The module performs no C<system()>, C<exec()>, backtick, or
+C<open(FH, "...|")> calls. Shell metacharacters in any field pose no
+command-injection risk within this module.
+
+=item * Database access is parameterised
+
+All SQL is executed via C<Database::Abstraction> (v0.37+), which uses
+DBI prepared statements. Values are bound as parameters, not interpolated
+into SQL strings.
+
+=back
+
+=head2 Known findings
+
+=over 4
+
+=item * B<Finding 1: C<first>, C<middle>, C<town> have no character-set constraint>
+
+These optional fields are validated for type (string) and length (1-100)
+only. SQL injection characters such as C<'>, C<;>, C<-->, and C<UNION>
+pass C<Params::Validate::Strict> for these fields and are forwarded to
+the database layer verbatim.
+
+B<Current mitigation>: C<Database::Abstraction> uses DBI parameterised
+queries, so the values are bound safely regardless of their content.
+
+B<Recommended defence-in-depth>: add C<matches> constraints to the schema
+for these fields, for example C<qr/^[\w\s\-,.]+$/>.
+
+B<Test coverage>: C<t/cgi_security.t>, section 10.
+
+=item * B<Finding 2: C<matches =E<gt> qr/^[\w\-]+$/> accepts Unicode word characters>
+
+The C<\w> class in a Perl regular expression matches Unicode word characters
+(including Cyrillic, Greek, Hebrew, etc.) when the input string carries the
+UTF-8 flag. Without the C</a> modifier, a Cyrillic string such as
+C<"\x{0430}mith"> passes the C<last> validation constraint.
+
+This is only a concern if strict ASCII-only last names are required. The
+data in the bundled database contains only ASCII names, so a Unicode
+homograph query would return zero results (safe, but unexpected).
+
+B<Recommended fix>: change the C<matches> value to C<qr/^[\w\-]+$/a> to
+restrict C<\w> to ASCII C<[0-9A-Za-z_]>.
+
+B<Test coverage>: C<t/cgi_security.t>, section 19.
+
+=item * B<Finding 3: caller-supplied logger is silently discarded>
+
+C<Object::Configure> always replaces the C<logger> argument with a
+C<Log::Abstraction> instance. A caller who passes a custom logger (for
+example, a C<Log::Log4perl> object) will find it silently ignored. The
+POD documents this parameter, but its effect is a no-op.
+
+B<Impact>: this is a usability limitation, not a security risk.
+
+B<Test coverage>: C<t/cgi_security.t>, section 15.
 
 =back
 

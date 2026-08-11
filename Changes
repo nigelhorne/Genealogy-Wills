@@ -8,19 +8,33 @@ Revision history for Genealogy::Wills
 	  directory fallback, optimised list-context return in search()
 	- Modernize bin/create_db.PL: remove old-style sub prototypes, replace SQL
 	  string-interpolation inserts with DBI prepared statements, state cache in normalise_name
-	- Add MAX_WILL_YEAR constant computed at load time; replaces hard-coded year max in
-	  search() validation schema so the bound stays current without manual updates
 	- Add =head1 LIMITATIONS POD section documenting ::new() behaviour, Sub::Private gap,
 	  load-time year cap, and single-source data limitation
+	- Add =head1 SECURITY POD section documenting attack surface, mitigations, and
+	  known findings for first/middle/town (no matches constraint), Unicode \w without /a,
+	  and Object::Configure logger replacement behaviour
 	- Enhance POD for new() and search() with EXAMPLE, API SPECIFICATION, MESSAGES,
 	  FORMAL SPECIFICATION, and PSEUDOCODE sub-sections
 	- Makefile.PL: remove unused File::Slurp, File::Basename, File::pfopen prerequisites;
-	  raise MIN_PERL_VERSION from 5.6.2 to 5.010 (required by use feature 'state')
+	  raise MIN_PERL_VERSION from 5.6.2 to 5.010 (required by use feature 'state');
+	  add Readonly to PREREQ_PM
 	- bin/create_db.PL: use Carp::croak instead of die; localize $| with local $| = 1
 	  to prevent output-buffering state leaking across calls; fix misleading memory comment
 	- Add t/locales.t: POSIX locale robustness tests verifying hardcoded error messages
 	  are locale-independent; uses $! directly (not POSIX::strerror) to avoid C-library
 	  divergence
+	- Add t/cgi_security.t: 20-subtest penetration test suite covering SQL injection,
+	  XSS, shell injection, CRLF, null bytes, path traversal, type confusion, DoS/ReDoS,
+	  hostile logger injection, CGI QUERY_STRING and POST body simulation; no real DB needed
+	- Logic-reducer: replace use constant with Readonly my $... for all four module
+	  constants (DEFAULT_CACHE_DURATION, MIN/MAX_LAST_NAME_LENGTH, MAX_WILL_YEAR);
+	  remove dead branches in new() (unreachable ::new()-with-args carp, dead clone guard);
+	  remove redundant s/[^\w\-]//g sanitization in search() (transitive reduction -- PVS
+	  already enforces the character set); normalize selectall_hashref return to // []
+	  eliminating one conditional branch; use cached stat (-r _) after -d in new()
+	- t/30-basics.t: add six equivalence-partition boundary tests for year field
+	  (year=0 dies, year=1 lives, year=MAX lives, year=MAX+1 dies) and scalar-context
+	  hashref return
 	[ Bug Fixes ]
 	- Work around MakeMaker copying to blib *before* running the script to build the files to go there
 	- search() now croaks with "Usage: ..." when called with no arguments
@@ -32,7 +46,8 @@ Revision history for Genealogy::Wills
 	  aliases (compile-time copies) bypassed the runtime override
 	- new() directory-not-found carp was a bare carp() call; changed to Carp::carp()
 	- search() sanitization regex s/[^\w\-']//g allowed apostrophes that the validation
-	  pattern qr/^[\w\-]+$/ rejects; fixed to s/[^\w\-]//g
+	  pattern qr/^[\w\-]+$/ rejects; fixed to s/[^\w\-]//g; subsequently removed
+	  entirely as a transitive reduction (PVS enforces the constraint upstream)
 	- bin/create_db.PL: removed dead die check after DBI->connect with RaiseError=>1
 	  (DBI throws before returning undef); removed duplicate mkdir block
 	- t/carp.t: added test for new() directory-not-found carp path; restructured to

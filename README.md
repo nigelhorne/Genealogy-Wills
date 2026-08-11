@@ -596,10 +596,114 @@ cap will be stale by one year until the module is reloaded.
     phonetic matching (e.g. Soundex, Levenshtein distance). Wildcard support
     depends on the `Database::Abstraction` layer.
 
+- **The `logger` argument is silently discarded.**
+
+    `Object::Configure` always supplies its own `Log::Abstraction` logger.
+    Any object passed as `logger` to `new()` is replaced before it is stored.
+    See the ["SECURITY"](#security) section, Finding 3.
+
 - **Single database source.**
 
     The data comes from a single scraped source (the Kent Wills Transcript). It
     does not cover wills from other counties or archives.
+
+# SECURITY
+
+This section documents the attack surface of the module, the controls in
+place, and known open findings. It is intended for developers integrating
+this module into a web application or CGI script.
+
+## Attack surface summary
+
+The module has two entry points: `new()` and `search()`. Neither reads
+from `%ENV`, `STDIN`, or any HTTP source directly. In a CGI context,
+the calling script is responsible for parsing HTTP inputs before passing
+them to this module.
+
+## Controls in place
+
+- `last` is strictly validated
+
+    `Params::Validate::Strict` enforces `matches => qr/^[\w\-]+$/` on
+    the `last` argument before any database call. This blocks SQL injection,
+    XSS, shell metacharacters, CRLF sequences, and null bytes for that field.
+
+- `year` is range-validated as an integer
+
+    `Params::Validate::Strict` enforces `type => 'integer'`, `min => 1`,
+    and `max => MAX_WILL_YEAR`. Non-integer strings, floats, and
+    out-of-range values are all rejected before DB access.
+
+- Directory and config-file paths are checked before use
+
+    `new()` verifies `-d $dir && -r _` for the data directory and `-r`
+    for any `config_file`. Paths that do not pass these checks cause `new()`
+    to return `undef` (with a warning) or croak immediately.
+
+- Logger injection is blocked by Object::Configure
+
+    `Object::Configure::configure()` always replaces the caller-supplied
+    `logger` argument with its own `Log::Abstraction` object, regardless
+    of what was passed. A hostile logger (missing methods, wrong type, or
+    carrying malicious extra methods) is discarded before any logging call
+    occurs. The module-level interface check `(blessed && can 'info' && can 'error')`
+    runs against the `Object::Configure`-supplied logger, which always passes.
+
+- No shell operations
+
+    The module performs no `system()`, `exec()`, backtick, or
+    `open(FH, "...|")` calls. Shell metacharacters in any field pose no
+    command-injection risk within this module.
+
+- Database access is parameterised
+
+    All SQL is executed via `Database::Abstraction` (v0.37+), which uses
+    DBI prepared statements. Values are bound as parameters, not interpolated
+    into SQL strings.
+
+## Known findings
+
+- **Finding 1: `first`, `middle`, `town` have no character-set constraint**
+
+    These optional fields are validated for type (string) and length (1-100)
+    only. SQL injection characters such as `'`, `;`, `--`, and `UNION`
+    pass `Params::Validate::Strict` for these fields and are forwarded to
+    the database layer verbatim.
+
+    **Current mitigation**: `Database::Abstraction` uses DBI parameterised
+    queries, so the values are bound safely regardless of their content.
+
+    **Recommended defence-in-depth**: add `matches` constraints to the schema
+    for these fields, for example `qr/^[\w\s\-,.]+$/`.
+
+    **Test coverage**: `t/cgi_security.t`, section 10.
+
+- **Finding 2: `matches => qr/^[\w\-]+$/` accepts Unicode word characters**
+
+    The `\w` class in a Perl regular expression matches Unicode word characters
+    (including Cyrillic, Greek, Hebrew, etc.) when the input string carries the
+    UTF-8 flag. Without the `/a` modifier, a Cyrillic string such as
+    `"\x{0430}mith"` passes the `last` validation constraint.
+
+    This is only a concern if strict ASCII-only last names are required. The
+    data in the bundled database contains only ASCII names, so a Unicode
+    homograph query would return zero results (safe, but unexpected).
+
+    **Recommended fix**: change the `matches` value to `qr/^[\w\-]+$/a` to
+    restrict `\w` to ASCII `[0-9A-Za-z_]`.
+
+    **Test coverage**: `t/cgi_security.t`, section 19.
+
+- **Finding 3: caller-supplied logger is silently discarded**
+
+    `Object::Configure` always replaces the `logger` argument with a
+    `Log::Abstraction` instance. A caller who passes a custom logger (for
+    example, a `Log::Log4perl` object) will find it silently ignored. The
+    POD documents this parameter, but its effect is a no-op.
+
+    **Impact**: this is a usability limitation, not a security risk.
+
+    **Test coverage**: `t/cgi_security.t`, section 15.
 
 # FORMAL SPECIFICATION
 
