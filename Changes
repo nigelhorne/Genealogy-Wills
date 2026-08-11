@@ -2,6 +2,25 @@ Revision history for Genealogy::Wills
 
 0.11
 	[ Enhancements ]
+	- Add t/path.t: 35-subtest exhaustive CFG path-coverage suite (LCSAJ/TER3).
+	  Maps all unique execution paths through new() (18 paths: PN-1 to PN-18),
+	  search() (12+ paths: PS-1 to PS-12), and _decorate_will() (1 sequential
+	  path: PD-1). Covers: ::new() function form with undef class (//= fires),
+	  clone paths (single-string, no-args // {} guard, flat-list override),
+	  config_file readable vs unreadable (D=TRUE/FALSE), all three logger-croak
+	  branches (not blessed, missing info(), missing error()), logger=undef
+	  defined() skip, directory //= MODULE_DATA_DIR branch, -d+r check both
+	  directions, unreadable directory (chmod 0, SKIP for root/Win32), A-branch
+	  (single-string arg) vs get_params branch for class->new(), PVS throws on
+	  bad last/optional-field/year (5 variants), D=TRUE carp in list+scalar
+	  context, wills->new()=undef croak, list context 0-iter and N-iter loops
+	  (fixate count proxy), scalar fetchrow=undef bare return, scalar
+	  fetchrow=defined Return::Set path, ||= short-circuit on pre-set slot,
+	  bare-string and hashref arg normalization.  Uses inline _PT_MockDB_Rows/
+	  _PT_MockDB_Empty packages (real named methods) to avoid Test::Mockingbird
+	  AUTOLOAD-cache decay that causes fetchrow_hashref to return 1 after
+	  multiple restore_all() cycles.  Dead-code summary: none.  Loop analysis:
+	  for-loop in search() executes 0 or N>=2 times (no annotation required).
 	- Add t/extended_tests.t: 14-subtest coverage-gap suite targeting untested
 	  LCSAJ/TER3 paths. Covers: scalar context + undef last (carps and returns
 	  undef, not empty list); new() logger => undef skips the defined() guard
