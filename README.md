@@ -228,7 +228,7 @@ On failure: `undef`, with a warning printed to STDERR naming the problem.
 #### output
 
     # Return::Set is not used by new().
-    output => {
+    {
         type => 'hashref',
         optional => 1
     }
@@ -368,7 +368,7 @@ Each hash reference has these keys: `first`, `last`, `middle`, `town`,
     schema => {
         last   => { type => 'string',
                     min  => 1, max => 100,
-                    matches => qr/^[\w-]+$/ },
+                    matches => qr/^[\w-]+\z/a },
         first  => { type => 'string',
                     min  => 1, max => 100,
                     optional => 1 },
@@ -383,9 +383,11 @@ Each hash reference has these keys: `first`, `last`, `middle`, `town`,
                     optional => 1 },
     };
 
-`MAX_WILL_YEAR` is `(localtime)[5] + 1900` computed once at module load.
+`$MAX_WILL_YEAR` is `(localtime)[5] + 1900` computed once at module load.
 `Params::Get::get_params('last', ...)` maps a bare string argument to
 `{ last => $string }` before validation runs.
+The schema hashref itself is a module-level constant allocated once at load
+time and shared across all calls; it is never modified at runtime.
 
 #### output
 
@@ -449,7 +451,7 @@ A plain-English description of what `search()` does, step by step:
        nothing (an empty list or undef, depending on context).
 
     6. (Removed: sanitization was a no-op. Validation in step 4 already
-       enforces [\w-] only via PVS matches => qr/^[\w\-]+$/.)
+       enforces [\w-] only via PVS matches => qr/^[\w-]+\z/a.)
 
     7. If this is the first search() call on this object, open the SQLite
        database. Reuse the existing connection on subsequent calls.
@@ -578,12 +580,6 @@ cap will be stale by one year until the module is reloaded.
     `Genealogy::Wills::new()` is partially handled (it defaults to
     `__PACKAGE__`). Always use the arrow form: `Genealogy::Wills->new()`.
 
-- **Private methods are unenforced.**
-
-    There are currently no private helper methods. If internal helpers are added
-    they should be marked with `Sub::Private` (`:Private` attribute) to prevent
-    accidental external use, and `Sub::Protected` for subclass-only methods.
-
 - **Year upper bound is capped at load time.**
 
     `MAX_WILL_YEAR` is computed once when the module is first loaded. In the
@@ -624,9 +620,12 @@ them to this module.
 
 - `last` is strictly validated
 
-    `Params::Validate::Strict` enforces `matches => qr/^[\w\-]+$/` on
+    `Params::Validate::Strict` enforces `matches => qr/^[\w-]+\z/a` on
     the `last` argument before any database call. This blocks SQL injection,
     XSS, shell metacharacters, CRLF sequences, and null bytes for that field.
+    The `/a` modifier restricts `\w` to ASCII `[0-9A-Za-z_]`, blocking
+    Unicode homograph queries. The `\z` anchor is strictly end-of-string,
+    unlike `$` which matches before a trailing newline.
 
 - `year` is range-validated as an integer
 
@@ -663,34 +662,68 @@ them to this module.
 
 ## Known findings
 
-- **Finding 1: `first`, `middle`, `town` have no character-set constraint**
+- **Finding 1 (fixed): `first`, `middle`, `town` now have `matches` constraints**
 
-    These optional fields are validated for type (string) and length (1-100)
-    only. SQL injection characters such as `'`, `;`, `--`, and `UNION`
-    pass `Params::Validate::Strict` for these fields and are forwarded to
-    the database layer verbatim.
+    Previously these optional fields were validated for type and length only,
+    allowing SQL metacharacters (`;`, `=`, `|`, `<`, `>`,
+    `\r`, `\n`, `\0`) to reach the database layer verbatim.
 
-    **Current mitigation**: `Database::Abstraction` uses DBI parameterised
-    queries, so the values are bound safely regardless of their content.
+    **Applied fix**: the schema now enforces:
 
-    **Recommended defence-in-depth**: add `matches` constraints to the schema
-    for these fields, for example `qr/^[\w\s\-,.]+$/`.
+        first/middle: matches => qr/^[\w '.-]+\z/
+        town:         matches => qr/^[\w ',.-]+\z/
+
+    These allow legitimate name characters (Unicode word chars, space,
+    apostrophe as in `O'Brien`, period as in `St. John`, hyphen as in
+    `Mary-Anne`, comma in town as in `"Canterbury, Kent, England"`) while
+    blocking injection metacharacters.
+
+    **Residual surface**: the pattern `Smith'--`, which contains only
+    apostrophe and hyphens, passes the constraint. It is neutralised by
+    `Database::Abstraction`'s parameterised queries - the value is bound
+    as a literal string, never interpolated into SQL.
+
+    **Primary defence**: parameterised queries (`Database::Abstraction`).
+    The `matches` constraint is defence-in-depth only.
 
     **Test coverage**: `t/cgi_security.t`, section 10.
 
-- **Finding 2: `matches => qr/^[\w\-]+$/` accepts Unicode word characters**
+- **Finding 4: `Genealogy__Wills__directory` environment variable can redirect the data directory**
 
-    The `\w` class in a Perl regular expression matches Unicode word characters
-    (including Cyrillic, Greek, Hebrew, etc.) when the input string carries the
-    UTF-8 flag. Without the `/a` modifier, a Cyrillic string such as
-    `"\x{0430}mith"` passes the `last` validation constraint.
+    `Object::Configure` reads environment variables of the form
+    `Genealogy__Wills__key` and merges them into the configuration before
+    `new()` applies defaults. Setting
+    `Genealogy__Wills__directory=/attacker/path` in the process environment
+    redirects `new()` to any SQLite file the attacker can create at that
+    path, causing `search()` to return results from a malicious database.
 
-    This is only a concern if strict ASCII-only last names are required. The
-    data in the bundled database contains only ASCII names, so a Unicode
-    homograph query would return zero results (safe, but unexpected).
+    **Conditions required**: the attacker must control the process environment
+    (`%ENV`) before `new()` is called. In a CGI context this requires
+    compromising the web server's environment-variable namespace, not merely
+    sending HTTP headers.
 
-    **Recommended fix**: change the `matches` value to `qr/^[\w\-]+$/a` to
-    restrict `\w` to ASCII `[0-9A-Za-z_]`.
+    **Mitigation**: ensure the web server or process supervisor sanitises
+    `%ENV` before execution. The `-d $dir && -r _` check in `new()`
+    prevents non-existent paths but does not block a readable
+    attacker-controlled directory.
+
+    **Test coverage**: none (requires process-level ENV control; mocked ENV
+    in tests does not reach `Object::Configure`).
+
+- **Finding 2 (fixed): `matches => qr/^[\w-]+\z/a` - Unicode and trailing-newline issues resolved**
+
+    The `\w` class without `/a` matched Unicode word characters (Cyrillic,
+    Greek, Hebrew, etc.), allowing a homograph query such as `"\x{0430}mith"`
+    to pass validation silently (returning zero results, not an error).
+
+    Additionally, the former `$` anchor matches before a trailing `\n`,
+    meaning `"Smith\n"` would have passed the pattern.
+
+    **Applied fix**: the schema now uses `qr/^[\w-]+\z/a`: `/a` restricts
+    `\w` to ASCII `[0-9A-Za-z_]`, and `\z` anchors to the absolute
+    end-of-string with no `\n` exception. The `\-` escape inside `[]`
+    has also been normalised to the idiomatic unescaped `-` at the end
+    of the character class.
 
     **Test coverage**: `t/cgi_security.t`, section 19.
 
@@ -704,33 +737,6 @@ them to this module.
     **Impact**: this is a usability limitation, not a security risk.
 
     **Test coverage**: `t/cgi_security.t`, section 15.
-
-# FORMAL SPECIFICATION
-
-System-level Z-notation for `Genealogy::Wills`. The `search()`
-function's specification also appears in detail under its own section above.
-
-    -- Scalar type definitions
-    NAME     == seq₁ CHAR      -- non-empty character sequence
-    PATHNAME == seq₁ CHAR      -- non-empty filesystem path
-    YEAR     == 1 .. MaxYear   -- positive integer up to the current year
-
-    -- The database object created by new()
-    WillsDatabase
-      directory      : PATHNAME
-      cache_duration : seq CHAR
-      records        : ℙ WillRecord
-
-    -- Successful construction invariant
-    ┌ InitWillsDatabase ─────────────────────────────────┐
-    │ WillsDatabase                                       │
-    │ ──────────────────────────────────────────────────  │
-    │ ∃ d : PATHNAME • directory = d ∧ is_readable(d)    │
-    │ cache_duration = "1 day"                            │
-    │ records = load_sqlite(directory ++ "/wills.sql")    │
-    └─────────────────────────────────────────────────────┘
-
-    -- search() function: see FORMAL SPECIFICATION under search() above
 
 # AUTHOR
 
@@ -786,6 +792,29 @@ Other resources:
     [http://deps.cpantesters.org/?module=Genealogy::Wills](http://deps.cpantesters.org/?module=Genealogy::Wills)
 
 # FORMAL SPECIFICATION
+
+System-level Z-notation for `Genealogy::Wills`. The `search()`
+function's specification also appears in detail under its own section.
+
+    -- Scalar type definitions
+    NAME     == seq₁ CHAR      -- non-empty character sequence
+    PATHNAME == seq₁ CHAR      -- non-empty filesystem path
+    YEAR     == 1 .. MaxYear   -- positive integer up to the current year
+
+    -- The database object created by new()
+    WillsDatabase
+      directory      : PATHNAME
+      cache_duration : seq CHAR
+      records        : ℙ WillRecord
+
+    -- Successful construction invariant
+    ┌ InitWillsDatabase ─────────────────────────────────┐
+    │ WillsDatabase                                       │
+    │ ──────────────────────────────────────────────────  │
+    │ ∃ d : PATHNAME • directory = d ∧ is_readable(d)    │
+    │ cache_duration = "1 day"                            │
+    │ records = load_sqlite(directory ++ "/wills.sql")    │
+    └─────────────────────────────────────────────────────┘
 
 ## search
 

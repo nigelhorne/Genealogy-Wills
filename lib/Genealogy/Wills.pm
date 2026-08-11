@@ -3,6 +3,7 @@ package Genealogy::Wills;
 use strict;
 use warnings;
 use autodie qw(:all);
+
 # Carp is intentionally NOT imported into this namespace. All calls must be
 # fully-qualified (Carp::croak, Carp::carp) so that Test::Carp can intercept
 # them at runtime. Bare imported aliases are compile-time copies and bypass
@@ -18,8 +19,6 @@ use Params::Validate::Strict 0.37;
 use Return::Set 0.05;
 use Scalar::Util qw(blessed);
 use Sub::Protected 0.02;
-
-=encoding utf-8
 
 =head1 NAME
 
@@ -915,7 +914,7 @@ blocking injection metacharacters.
 
 B<Residual surface>: the pattern C<Smith'-->, which contains only
 apostrophe and hyphens, passes the constraint. It is neutralised by
-C<Database::Abstraction>'s parameterised queries — the value is bound
+C<Database::Abstraction>'s parameterised queries - the value is bound
 as a literal string, never interpolated into SQL.
 
 B<Primary defence>: parameterised queries (C<Database::Abstraction>).
@@ -945,7 +944,7 @@ attacker-controlled directory.
 B<Test coverage>: none (requires process-level ENV control; mocked ENV
 in tests does not reach C<Object::Configure>).
 
-=item * B<Finding 2 (fixed): C<matches =E<gt> qr/^[\w-]+\z/a> — Unicode and trailing-newline issues resolved>
+=item * B<Finding 2 (fixed): C<matches =E<gt> qr/^[\w-]+\z/a> - Unicode and trailing-newline issues resolved>
 
 The C<\w> class without C</a> matched Unicode word characters (Cyrillic,
 Greek, Hebrew, etc.), allowing a homograph query such as C<"\x{0430}mith">
@@ -974,33 +973,6 @@ B<Impact>: this is a usability limitation, not a security risk.
 B<Test coverage>: C<t/cgi_security.t>, section 15.
 
 =back
-
-=head1 FORMAL SPECIFICATION
-
-System-level Z-notation for C<Genealogy::Wills>. The C<search()>
-function's specification also appears in detail under its own section above.
-
-    -- Scalar type definitions
-    NAME     == seq₁ CHAR      -- non-empty character sequence
-    PATHNAME == seq₁ CHAR      -- non-empty filesystem path
-    YEAR     == 1 .. MaxYear   -- positive integer up to the current year
-
-    -- The database object created by new()
-    WillsDatabase
-      directory      : PATHNAME
-      cache_duration : seq CHAR
-      records        : ℙ WillRecord
-
-    -- Successful construction invariant
-    ┌ InitWillsDatabase ─────────────────────────────────┐
-    │ WillsDatabase                                       │
-    │ ──────────────────────────────────────────────────  │
-    │ ∃ d : PATHNAME • directory = d ∧ is_readable(d)    │
-    │ cache_duration = "1 day"                            │
-    │ records = load_sqlite(directory ++ "/wills.sql")    │
-    └─────────────────────────────────────────────────────┘
-
-    -- search() function: see FORMAL SPECIFICATION under search() above
 
 =head1 AUTHOR
 
@@ -1072,7 +1044,32 @@ L<http://deps.cpantesters.org/?module=Genealogy::Wills>
 
 =back
 
+=encoding utf-8
+
 =head1 FORMAL SPECIFICATION
+
+System-level Z-notation for C<Genealogy::Wills>. The C<search()>
+function's specification also appears in detail under its own section.
+
+    -- Scalar type definitions
+    NAME     == seq₁ CHAR      -- non-empty character sequence
+    PATHNAME == seq₁ CHAR      -- non-empty filesystem path
+    YEAR     == 1 .. MaxYear   -- positive integer up to the current year
+
+    -- The database object created by new()
+    WillsDatabase
+      directory      : PATHNAME
+      cache_duration : seq CHAR
+      records        : ℙ WillRecord
+
+    -- Successful construction invariant
+    ┌ InitWillsDatabase ─────────────────────────────────┐
+    │ WillsDatabase                                       │
+    │ ──────────────────────────────────────────────────  │
+    │ ∃ d : PATHNAME • directory = d ∧ is_readable(d)    │
+    │ cache_duration = "1 day"                            │
+    │ records = load_sqlite(directory ++ "/wills.sql")    │
+    └─────────────────────────────────────────────────────┘
 
 =head2 search
 
