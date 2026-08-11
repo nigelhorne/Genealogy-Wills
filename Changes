@@ -2,6 +2,19 @@ Revision history for Genealogy::Wills
 
 0.11
 	[ Enhancements ]
+	- Add t/extended_tests.t: 14-subtest coverage-gap suite targeting untested
+	  LCSAJ/TER3 paths. Covers: scalar context + undef last (carps and returns
+	  undef, not empty list); new() logger => undef skips the defined() guard
+	  branch; wills->new() arg capture (no_entry, no_fixate, directory all
+	  forwarded); void context search() (wantarray false, scalar branch taken);
+	  hashref argument form happy path; Data::Reuse::fixate call count equals
+	  row count in list context and is zero for empty list; Return::Set::set_return
+	  invoked exactly once in scalar non-null path; alternating list/scalar calls
+	  on same object (no cross-contamination); clone inheriting pre-set wills slot
+	  (wills::new() not called again on clone); first/middle/town/year optional
+	  fields forwarded verbatim to DB layer (apostrophe, period, hyphen, comma
+	  preserved); bare-string form maps to { last => string } verified at DB
+	  boundary; clone with no-arg new() inherits all original attribute values.
 	- Regex audit: lib/Genealogy/Wills.pm: $MODULE_DATA_DIR s/\.pm$// → s/\.pm\z// (strict
 	  end-of-string; $ matches before trailing \n, \z does not)
 	- Regex audit: lib/Genealogy/Wills.pm: $SEARCH_SCHEMA matches qr/^[\w\-]+$/ → qr/^[\w-]+\z/a:
