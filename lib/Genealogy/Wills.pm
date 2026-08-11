@@ -18,9 +18,11 @@ use Params::Validate::Strict 0.37;
 use Return::Set 0.05;
 use Scalar::Util qw(blessed);
 
+=encoding utf-8
+
 =head1 NAME
 
-Genealogy::Wills - Lookup in a database of wills
+Genealogy::Wills - Search a local database of historical wills from Kent, England
 
 =head1 VERSION
 
@@ -40,87 +42,246 @@ use constant {
 
 =head1 DESCRIPTION
 
-This module provides a convenient interface to search through a database of historical wills,
-primarily focused on the Kent Wills Transcript.
-It handles database connections, caching, and result formatting.
+A "will" (short for "last will and testament") is a legal document in which a
+person states who should receive their money and property after they die. Courts
+record when a will is officially accepted (called "probate"). This module gives
+you a simple way to search those records.
 
-- Results are cached for 1 day by default
-- Database connections are lazy-loaded
-- Large result sets may consume significant memory
+The data comes from the B<Kent Wills Transcript>, a free online collection of
+wills proved in Kent, England, covering roughly the 1500s through the 1900s.
+That data is stored in a local SQLite file (C<wills.sql>), so B<no internet
+connection is needed> when you run a search. The database is built once by
+running C<perl bin/create_db.PL>.
+
+Each record in the database describes one will and contains:
+
+=over 4
+
+=item * The person's first name, optional middle name, and last name (surname).
+
+=item * The town where the person lived or died.
+
+=item * The year the will was proved (officially accepted by the court).
+
+=item * A URL linking to the original entry on the Kent Wills Transcript website.
+
+=back
+
+Using the module is a two-step process: create one C<Genealogy::Wills> object
+with C<new()>, then call C<search()> as many times as you like.
 
 =head1 SYNOPSIS
 
-    # See https://freepages.rootsweb.com/~mrawson/genealogy/wills.html
     use Genealogy::Wills;
+
+    # -------------------------------------------------------------------
+    # Example 1: Find all records for a given last name.
+    # -------------------------------------------------------------------
     my $wills = Genealogy::Wills->new();
-    # ...
+    die "Could not load wills database" unless defined $wills;
+
+    my @smiths = $wills->search(last => 'Smith');
+    for my $r (@smiths) {
+        printf "%s %s, %s (%d)\n  %s\n\n",
+            $r->{first}, $r->{last},
+            $r->{town},  $r->{year},
+            $r->{url};
+    }
+
+    # -------------------------------------------------------------------
+    # Example 2: Short form -- pass just the last name as a plain string.
+    # -------------------------------------------------------------------
+    my @joneses = $wills->search('Jones');
+
+    # -------------------------------------------------------------------
+    # Example 3: Narrow by first name, town, and year.
+    # -------------------------------------------------------------------
+    my @johns = $wills->search(
+        first => 'John',
+        last  => 'Smith',
+        town  => 'Canterbury, Kent, England',
+        year  => 1750,
+    );
+
+    # -------------------------------------------------------------------
+    # Example 4: Scalar context -- get only the first matching record.
+    # Use this when you want one result, not a list.
+    # -------------------------------------------------------------------
+    my $will = $wills->search(last => 'Carlton');
+    if (defined $will) {
+        print "First match: $will->{first} $will->{last} ($will->{year})\n";
+        print "See: $will->{url}\n";
+    } else {
+        print "No record found.\n";
+    }
+
+    # -------------------------------------------------------------------
+    # Example 5: Check whether anything was found.
+    # -------------------------------------------------------------------
+    my @results = $wills->search(last => 'Xyz');
+    if (@results) {
+        print scalar(@results), " records found.\n";
+    } else {
+        print "No records found.\n";
+    }
+
+    # -------------------------------------------------------------------
+    # Example 6: Point at a different database directory.
+    # -------------------------------------------------------------------
+    my $wills2 = Genealogy::Wills->new(directory => '/var/data/wills');
+
+    # -------------------------------------------------------------------
+    # Example 7: Load settings from a config file.
+    # The YAML key must use double underscores: Genealogy__Wills
+    # -------------------------------------------------------------------
+    # Contents of /etc/wills.yml:
+    #   Genealogy__Wills:
+    #     directory: /var/data/wills
+    my $wills3 = Genealogy::Wills->new(config_file => '/etc/wills.yml');
+
+    # -------------------------------------------------------------------
+    # Example 8: Clone an existing object, changing one setting.
+    # -------------------------------------------------------------------
+    my $wills4 = $wills->new(cache_duration => '12 hours');
 
 =head1 SUBROUTINES/METHODS
 
 =head2 new
 
-Creates a C<Genealogy::Wills> object.
+Creates and returns a C<Genealogy::Wills> object.
 
-Takes up to three optional arguments as a hash, hashref, or key-value pairs.
-Returns the new object, or C<undef> if the directory is invalid.
+No arguments are required. All arguments are optional and may be passed in any
+of these forms:
+
+    Genealogy::Wills->new()                        # no arguments
+    Genealogy::Wills->new(key => value, ...)       # flat key-value list
+    Genealogy::Wills->new({ key => value, ... })   # hash reference
+    Genealogy::Wills->new('/path/to/data')         # single string = directory
+
+B<Returns> the new object on success, or C<undef> on failure (for example,
+if the database directory does not exist). A warning is printed to explain
+what went wrong.
+
+B<Always check the return value> before calling C<search()>. If C<new()>
+returns C<undef> and you ignore it, a call to C<search()> will crash your
+program later with a confusing error.
+
+    my $wills = Genealogy::Wills->new();
+    die "Could not load database" unless defined $wills;
+
+=head3 ARGUMENTS
 
 =over 4
 
-=item * C<config_file>
+=item * C<directory> (optional, string)
 
-Path to a configuration file (C<YAML>, C<XML>, C<INI>, etc.) whose top-level
-key matching the class name supplies default parameters. Environment variables
-of the form C<ClassName__key> override file values.
-Croaks if the path is specified but the file does not exist or is not readable.
+The path to the directory that contains the C<wills.sql> file.
 
-=item * C<directory>
+If you do not provide this, the module uses its own built-in data directory,
+which is set up when you run C<perl bin/create_db.PL>.
 
-Directory containing C<wills.sql>.
-If not given, uses the module's own data directory (C<lib/Genealogy/Wills/data/>).
+You can also pass a single bare string as a shortcut:
 
-=item * C<logger>
+    Genealogy::Wills->new('/path/to/data')
+    # is the same as
+    Genealogy::Wills->new(directory => '/path/to/data')
 
-An object with C<info()> and C<error()> methods; used by the underlying
-C<Database::Abstraction> layer for diagnostics.
+=item * C<config_file> (optional, string)
+
+Path to a configuration file in C<YAML>, C<XML>, C<INI>, or another format
+supported by L<Object::Configure>.
+
+The file must have a top-level section named C<Genealogy__Wills> (the class
+name with C<::> replaced by C<__>). For example:
+
+    # /etc/wills.yml
+    Genealogy__Wills:
+      directory: /var/data/wills
+
+Environment variables of the form C<Genealogy__Wills__key> override values
+read from the file. For example, setting
+C<Genealogy__Wills__directory=/tmp/wills> in the shell overrides the
+C<directory> from the file.
+
+B<Croaks> (the program stops with an error message) if you provide a
+C<config_file> path that does not exist or cannot be read.
+
+=item * C<logger> (optional, object)
+
+An object used to write diagnostic messages. It must have both an C<info()>
+method and an C<error()> method. Any L<Log::Log4perl> logger, or any object
+that implements those two methods, works.
+
+B<Croaks> if an object is provided but is missing the required methods.
+
+=item * C<cache_duration> (optional, string)
+
+How long the underlying C<Database::Abstraction> layer caches query results.
+Default is C<'1 day'>. Accepts strings like C<'12 hours'>, C<'2 days'>.
 
 =back
 
+=head3 RETURNS
+
+On success: a C<Genealogy::Wills> object.
+
+On failure: C<undef>, with a warning printed to STDERR naming the problem.
+
 =head3 EXAMPLE
 
-    # Minimal - uses the bundled database
-    my $wills = Genealogy::Wills->new();
+    # Minimal -- uses the bundled database
+    my $w = Genealogy::Wills->new();
+    die "Failed to load database" unless defined $w;
 
-    # Explicit directory
-    my $wills = Genealogy::Wills->new(directory => '/data/wills');
+    # Explicit directory path
+    my $w = Genealogy::Wills->new(directory => '/data/kent-wills');
+
+    # Hash-reference form (same result)
+    my $w = Genealogy::Wills->new({ directory => '/data/kent-wills' });
+
+    # Single-string shortcut (treated as the directory path)
+    my $w = Genealogy::Wills->new('/data/kent-wills');
 
     # From a YAML config file
-    my $wills = Genealogy::Wills->new(config_file => '/etc/wills.yml');
+    my $w = Genealogy::Wills->new(config_file => '/etc/wills.yml');
+
+    # Clone an existing object, changing the cache duration
+    my $w2 = $w->new(cache_duration => '12 hours');
 
 =head3 API SPECIFICATION
 
-    # Input (all optional)
+    # Input -- all keys are optional
     {
-        config_file => Str,     # readable file path
-        directory   => Str,     # readable directory path
-        logger      => Object,  # must implement info() and error()
+        directory      => Str,      # readable directory path
+        config_file    => Str,      # readable file path (croaks if unreadable)
+        logger         => Object,   # must implement info() and error()
+        cache_duration => Str,      # e.g. '1 day', '12 hours'
     }
 
-    # Returns
-    Genealogy::Wills object, or undef if directory is invalid.
+    # Return type
+    Genealogy::Wills | undef
 
 =head3 MESSAGES
 
-    Can't load configuration from <path>
-        config_file was specified but the path is missing or unreadable.
-        Resolution: verify path and permissions.
+=over 4
 
-    Logger must be an object with info() and error() methods
-        logger does not satisfy the required interface.
-        Resolution: pass a compatible logger (e.g. Log::Log4perl).
+=item B<Can't load configuration from E<lt>pathE<gt>>
 
-    Genealogy::Wills: <dir> is not a directory
-        The resolved directory does not exist or is not readable.
-        Resolution: verify the path; rebuild the DB with bin/create_db.PL.
+Fatal. The C<config_file> path was given but the file is missing or
+unreadable. Check the path and file permissions.
+
+=item B<Logger must be an object with info() and error() methods>
+
+Fatal. The C<logger> argument is not an object, or is missing C<info()>
+or C<error()>. Pass a compatible logger such as L<Log::Log4perl>.
+
+=item B<Genealogy::Wills: E<lt>dirE<gt> is not a directory>
+
+Warning (not fatal). The resolved directory does not exist or cannot be read.
+C<new()> returns C<undef>. Verify the path; if using the bundled database run
+C<perl bin/create_db.PL>.
+
+=back
 
 =cut
 
@@ -182,88 +343,214 @@ sub new {
 
 =head2 search
 
-Search the wills database.
+Search the wills database for records that match the criteria you provide.
 
-C<last> (last name) is mandatory and must be a non-empty string of word
-characters (C<\w>) and hyphens only.
-Croaks immediately if called with no arguments at all.
+The last name (C<last>) is the only required field. All other fields are
+optional and narrow the results further. If more than one field is given, a
+record must match B<all> of them to be returned.
 
-In list context returns an array of hashrefs (empty list when nothing matches).
-In scalar context returns a single hashref wrapped in C<Return::Set> (undef
-when nothing matches).
-Every returned hashref has C<first>, C<last>, C<town>, C<year>, and C<url>
-fields; C<url> has C<https://> prepended.
+B<Important -- context matters>: what you get back depends on how you call the
+method:
+
+=over 4
+
+=item * B<List context> (C<my @results = $w-E<gt>search(...)>)
+
+Returns B<all> matching records as a list of hash references. Returns an empty
+list (C<()>) when nothing matches.
+
+=item * B<Scalar context> (C<my $result = $w-E<gt>search(...)>)
+
+Returns B<one> hash reference (the first match found), or C<undef> when
+nothing matches.
+
+=back
+
+Each returned hash reference has these keys:
+
+    first  -- first name (string)
+    last   -- last name (string)
+    middle -- middle name (string, or undef if not recorded)
+    town   -- town, e.g. "Canterbury, Kent, England" (string, or undef)
+    year   -- year the will was proved (integer, or undef)
+    url    -- full URL to the source page, e.g. "https://freepages..."
+
+The C<url> field always starts with C<https://>.
+
+=head3 ARGUMENTS
+
+=over 4
+
+=item * C<last> (required, string)
+
+The surname (last name, family name) to search for.
+
+Must be non-empty and contain only letters, digits, underscores (the C<\w>
+set), and hyphens. Any other characters are silently stripped before the
+query runs. For example, C<"O'Brien"> becomes C<"OBrien">.
+
+The search is B<exact-match>: C<"Smith"> finds only the exact string
+C<"Smith">, not C<"Smithson">.
+
+=item * C<first> (optional, string, 1-100 characters)
+
+The first name (given name) to filter by.
+
+=item * C<middle> (optional, string, 1-100 characters)
+
+The middle name to filter by.
+
+=item * C<town> (optional, string, 1-100 characters)
+
+The town to filter by. Records use the format C<"Townname, Kent, England">.
+Use the exact spelling seen in earlier results, or leave this out and
+narrow by other fields instead.
+
+=item * C<year> (optional, integer, 1 to current year)
+
+The year the will was proved. Must be a positive whole number no greater
+than the current calendar year.
+
+=back
+
+You may pass arguments in three ways:
+
+    $w->search(last => 'Smith')              # flat key-value list
+    $w->search({ last => 'Smith' })          # hash reference
+    $w->search('Smith')                      # bare string = last name only
+
+=head3 RETURNS
+
+B<List context>: a list of hash references (may be empty).
+
+B<Scalar context>: one hash reference, or C<undef> if nothing matched.
+
+Each hash reference has these keys: C<first>, C<last>, C<middle>, C<town>,
+C<year>, C<url>.
 
 =head3 EXAMPLE
 
-    my $wills = Genealogy::Wills->new();
+    my $w = Genealogy::Wills->new();
 
-    # All Smiths
-    my @smiths = $wills->search(last => 'Smith');
+    # All records for the surname "Cowell"
+    my @all = $w->search(last => 'Cowell');
+    print scalar(@all), " records found.\n";
 
-    # Short form: single string is treated as the last name
-    my @smiths = $wills->search('Smith');
+    # Bare string shortcut
+    my @smiths = $w->search('Smith');
 
-    # Multi-field search
-    my @joneses = $wills->search({ first => 'Mary', last => 'Jones', year => 1750 });
+    # Multiple filters
+    my @hits = $w->search(
+        first => 'Stephen',
+        last  => 'Carlton',
+        town  => 'Ash, Kent, England',
+    );
 
-    print $smiths[0]->{'first'}, ' ', $smiths[0]->{'url'}, "\n";
+    # Scalar context: one result or undef
+    my $one = $w->search(last => 'Horne');
+    if (defined $one) {
+        printf "%s %s (%d): %s\n",
+            $one->{first}, $one->{last}, $one->{year}, $one->{url};
+    }
+
+    # url always starts with https://
+    for my $r ($w->search(last => 'Smith')) {
+        print $r->{url}, "\n";
+    }
 
 =head3 API SPECIFICATION
 
     # Input
     {
-        last   => Str,      # required; /^[\w-]+$/
-        first  => Str,      # optional; 1-100 chars
-        middle => Str,      # optional; 1-100 chars
-        town   => Str,      # optional; 1-100 chars
-        year   => Int,      # optional; 1 .. current year
+        last   => Str,    # required; /^[\w-]+$/ after stripping; 1-100 chars
+        first  => Str,    # optional; 1-100 chars
+        middle => Str,    # optional; 1-100 chars
+        town   => Str,    # optional; 1-100 chars
+        year   => Int,    # optional; 1 .. MAX_WILL_YEAR (current year at load)
     }
 
-    # List context
-    Returns: Array of HashRefs  (empty if no match)
+    # List context return
+    Returns: Array of HashRef, each containing:
+        {
+            first  => Str,
+            last   => Str,
+            middle => Str | undef,
+            town   => Str | undef,
+            year   => Int | undef,
+            url    => Str,          # always "https://..."
+        }
+    Returns empty list when no records match.
 
-    # Scalar context
-    Returns: HashRef | undef
+    # Scalar context return (wrapped by Return::Set)
+    Returns: HashRef (same shape as above) | undef
 
 =head3 MESSAGES
 
-    search() must be called on an object
-        Called as Genealogy::Wills->search() (class method) instead of
-        $obj->search().
+=over 4
 
-    Usage: search({ last => $last_name })
-        Called with no arguments.
-        Resolution: provide at least last => $name.
+=item B<search() must be called on an object>
 
-    Value for 'last' is mandatory
-        last was passed as undef or empty string.
-        Resolution: supply a non-empty last name.
+Fatal. You called C<search()> as a class method
+(C<Genealogy::Wills-E<gt>search(...)>) instead of on an object. Create the
+object first with C<new()>, then call C<search()> on it.
 
-    Can't open the wills database
-        The wills database object could not be initialised.
-        Resolution: rebuild with bin/create_db.PL.
+=item B<Usage: search({ last =E<gt> $last_name })>
+
+Fatal. C<search()> was called with no arguments at all.
+Always provide at least C<last =E<gt> $name>.
+
+=item B<Value for 'last' is mandatory>
+
+Warning (not fatal). The C<last> argument was provided but its value was
+C<undef> or an empty string. C<search()> returns no results in this case.
+Supply a non-empty string.
+
+=item B<Can't open the wills database>
+
+Fatal. The internal database object could not be created. The database file
+may be missing or corrupted. Rebuild with C<perl bin/create_db.PL -f>.
+
+=back
 
 =head3 PSEUDOCODE
 
-    search(self, args):
-        croak unless self is a blessed object
-        croak with Usage if no args provided
-        params = parse_and_validate(args)     # Params::Get + Params::Validate::Strict
-        carp and return if params.last is empty/undef
-        sanitize params.last (strip non-[\w-])
-        initialise DB connection if not already open
-        croak if DB connection failed
-        if list context:
-            rows = selectall_hashref(params)
-            prepend https:// to each url
-            fixate strings for memory efficiency
-            return @rows
-        else:
-            row = fetchrow_hashref(params)
-            prepend https:// to url
-            fixate strings
-            return row via Return::Set
+A plain-English description of what C<search()> does, step by step:
+
+    1. If the caller is not a Genealogy::Wills object, die immediately.
+
+    2. If no arguments were given, die immediately.
+
+    3. Parse the arguments:
+         - A single bare string becomes { last => $string }.
+         - A hash reference or flat key-value list is used as-is.
+
+    4. Validate the parsed arguments:
+         - 'last' must match /^[\w-]+$/ and be 1-100 characters.
+         - 'first', 'middle', 'town': optional strings, 1-100 characters each.
+         - 'year': optional integer between 1 and the current year.
+
+    5. If 'last' is undef or empty after parsing, print a warning and return
+       nothing (an empty list or undef, depending on context).
+
+    6. Strip any characters from 'last' that are not [\w-].
+
+    7. If this is the first search() call on this object, open the SQLite
+       database. Reuse the existing connection on subsequent calls.
+
+    8. If the database could not be opened, die immediately.
+
+    9. Execute the query:
+         List context:
+           Fetch all matching rows.
+           Prepend "https://" to the url of every row.
+           Intern all strings (Data::Reuse::fixate) to save memory.
+           Return the list of hashrefs.
+
+         Scalar context:
+           Fetch the first matching row.
+           Prepend "https://" to its url.
+           Intern all strings.
+           Return the hashref (or undef if nothing matched).
 
 =cut
 
@@ -338,39 +625,166 @@ sub search {
 	return;
 }
 
-=encoding utf-8
+=head1 COMMON PITFALLS
+
+This section describes the most common mistakes when using this module.
+Read it before reporting a bug.
+
+=head2 List context vs. scalar context give different results
+
+This is the single most important thing to understand. The same call returns
+different things depending on whether you store the result in an array or a
+scalar variable:
+
+    my @all   = $wills->search(last => 'Smith');  # ALL Smiths (may be many)
+    my $first = $wills->search(last => 'Smith');  # ONE Smith only
+
+If you accidentally write C<my $r = $wills-E<gt>search(...)>, you get at most
+one record even if hundreds matched. Use C<my @results = ...> unless you
+specifically want only the first match.
+
+=head2 new() returns undef on failure -- it does not crash
+
+If the directory does not exist or cannot be read, C<new()> prints a warning
+and returns C<undef>. Your program does B<not> stop. If you then call
+C<search()> on the C<undef> value, it will crash later with an unhelpful error.
+
+Always check the return value:
+
+    my $wills = Genealogy::Wills->new();
+    die "Could not load wills database" unless defined $wills;
+
+=head2 No arguments is fatal; undef is only a warning
+
+These two situations look similar but have very different consequences:
+
+    $wills->search();               # FATAL -- program stops with an exception
+    $wills->search(last => undef);  # WARNING only -- returns no results
+
+Always provide at least C<last =E<gt> $name>.
+
+=head2 The url field already contains https://
+
+Every returned record has its C<url> field set to a full URL starting with
+C<https://>. Do not add the scheme prefix yourself:
+
+    print $r->{url};               # correct: https://freepages.rootsweb.com/...
+    print 'https://' . $r->{url}; # WRONG:   https://https://freepages...
+
+=head2 Apostrophes and punctuation are stripped from last names
+
+The module accepts only word characters (C<\w>) and hyphens in the C<last>
+argument. Any other character, including apostrophes, is silently removed
+before the database query runs.
+
+    $wills->search(last => "O'Brien");  # queries for "OBrien", not "O'Brien"
+
+If you expect a record for C<O'Brien>, search for C<OBrien> instead.
+
+=head2 Search is exact-match -- no wildcards or fuzzy matching
+
+The query looks for an exact match on every field you provide. Partial
+last names and wildcard patterns (such as C<Smith*>) are not supported
+through this interface.
+
+    $wills->search(last => 'Smith');  # finds "Smith" only
+    # Does NOT find "Smithson", "Blacksmith", "Goldsmith", etc.
+
+=head2 The config file key uses double underscores, not colons
+
+When using a YAML (or other) config file, the section name for this class
+must use two underscores in place of each C<::> in the package name:
+
+    # CORRECT
+    Genealogy__Wills:
+      directory: /var/data/wills
+
+    # WRONG (causes the config to be silently ignored)
+    Genealogy::Wills:
+      directory: /var/data/wills
+
+The same rule applies to environment variable overrides:
+C<Genealogy__Wills__directory=/tmp/wills>.
+
+=head2 Do not use the function-call syntax with arguments
+
+Calling C<new()> as a plain function (C<::> instead of C<-E<gt>>) with
+arguments does not work correctly. The first argument is misread as the
+class name.
+
+    Genealogy::Wills->new()            # correct -- arrow syntax
+    Genealogy::Wills::new()            # tolerated -- no args, defaults to package
+    Genealogy::Wills::new('/data')     # WRONG -- '/data' is misused as class name
+
+=head2 The year upper limit is fixed when the module loads
+
+The maximum allowed C<year> value is computed once the first time
+C<use Genealogy::Wills> is executed. If your process runs for a very long
+time and crosses a year boundary (e.g. from 31 December to 1 January), the
+cap will be stale by one year until the module is reloaded.
 
 =head1 LIMITATIONS
 
 =over 4
 
 =item * B<C<::new()> with arguments is unsupported.>
+
 C<Genealogy::Wills::new('Smith')> shifts C<'Smith'> into C<$class> and
 attempts to bless into it. Only the no-argument form
 C<Genealogy::Wills::new()> is partially handled (it defaults to
 C<__PACKAGE__>). Always use the arrow form: C<< Genealogy::Wills->new() >>.
 
 =item * B<Private methods are unenforced.>
-There are currently no private helper methods in this module. If internal
-helpers are added they should be marked with C<Sub::Private> (C<:Private>
-attribute) to prevent accidental external use. C<Sub::Protected> should be
-used for methods intended only for subclasses.
+
+There are currently no private helper methods. If internal helpers are added
+they should be marked with C<Sub::Private> (C<:Private> attribute) to prevent
+accidental external use, and C<Sub::Protected> for subclass-only methods.
 
 =item * B<Year upper bound is capped at load time.>
+
 C<MAX_WILL_YEAR> is computed once when the module is first loaded. In the
 unlikely event the module remains loaded across a year boundary the cap will
 be one year stale.
 
-=item * B<No full-text search.>
+=item * B<No full-text or fuzzy search.>
+
 Searches are exact-match on the columns provided. There is no fuzzy or
-phonetic matching (e.g. Soundex). Wildcard support depends on the
-C<Database::Abstraction> layer.
+phonetic matching (e.g. Soundex, Levenshtein distance). Wildcard support
+depends on the C<Database::Abstraction> layer.
 
 =item * B<Single database source.>
+
 The data comes from a single scraped source (the Kent Wills Transcript). It
-does not cover wills from other archives.
+does not cover wills from other counties or archives.
 
 =back
+
+=head1 FORMAL SPECIFICATION
+
+System-level Z-notation for C<Genealogy::Wills>. The C<search()>
+function's specification also appears in detail under its own section above.
+
+    -- Scalar type definitions
+    NAME     == seq₁ CHAR      -- non-empty character sequence
+    PATHNAME == seq₁ CHAR      -- non-empty filesystem path
+    YEAR     == 1 .. MaxYear   -- positive integer up to the current year
+
+    -- The database object created by new()
+    WillsDatabase
+      directory      : PATHNAME
+      cache_duration : seq CHAR
+      records        : ℙ WillRecord
+
+    -- Successful construction invariant
+    ┌ InitWillsDatabase ─────────────────────────────────┐
+    │ WillsDatabase                                       │
+    │ ──────────────────────────────────────────────────  │
+    │ ∃ d : PATHNAME • directory = d ∧ is_readable(d)    │
+    │ cache_duration = "1 day"                            │
+    │ records = load_sqlite(directory ++ "/wills.sql")    │
+    └─────────────────────────────────────────────────────┘
+
+    -- search() function: see FORMAL SPECIFICATION under search() above
 
 =head1 AUTHOR
 
@@ -378,19 +792,49 @@ Nigel Horne, C<< <njh at nigelhorne.com> >>
 
 =head1 BUGS
 
+Please report bugs at
+L<https://rt.cpan.org/NoAuth/Bugs.html?Dist=Genealogy-Wills>
+or by email to C<bug-Genealogy-Wills@rt.cpan.org>.
+
+When reporting a bug, please include:
+
+=over 4
+
+=item * The version of this module (run C<perl -MGenealogy::Wills -e 'print $Genealogy::Wills::VERSION'>).
+
+=item * The version of Perl (run C<perl -V>).
+
+=item * A short script that shows the problem.
+
+=back
+
 =head1 SEE ALSO
 
-The Kent Wills Transcript, L<https://freepages.rootsweb.com/~mrawson/genealogy/wills.html>
+=over 4
+
+=item * The Kent Wills Transcript
+
+L<https://freepages.rootsweb.com/~mrawson/genealogy/wills.html>
+
+=item * L<Database::Abstraction> -- the SQL layer used internally by this module.
+
+=item * L<Configure an Object at Runtime|Object::Configure>
+
+=item * L<Test Dashboard|https://nigelhorne.github.io/Genealogy-Wills/coverage/>
+
+=item * L<Return::Set> -- enforces return-type contracts on C<search()>.
+
+=back
 
 =head1 SUPPORT
 
 This module is provided as-is without any warranty.
 
-You can find documentation for this module with the perldoc command.
+You can find documentation for this module with the perldoc command:
 
     perldoc Genealogy::Wills
 
-You can also look for information at:
+Other resources:
 
 =over 4
 
@@ -416,40 +860,65 @@ L<http://deps.cpantesters.org/?module=Genealogy::Wills>
 
 =head2 search
 
-    [NAME, URL, DIRECTORY]
+The following Z-notation gives the precise mathematical meaning of C<search()>.
+Optional fields that the caller did not supply are modelled as undefined.
 
-    WillRecord == [
-        first  : NAME;
-        last   : NAME;
-        url    : URL;
-        additional_fields : P(NAME x seq CHAR)
-    ]
+    -- Type aliases
+    NAME == seq₁ CHAR       -- a non-empty sequence of characters
+    YEAR == 1 .. MaxYear    -- positive integer bounded by current year
 
-    SearchParams == [
-        last   : NAME;
-        first  : NAME;          -- optional
-        middle : NAME;          -- optional
-        town   : NAME;          -- optional
-        year   : N              -- optional
-    ]
+    -- One record stored in the database
+    WillRecord
+      first  : NAME
+      last   : NAME
+      middle : NAME | undefined
+      town   : NAME | undefined
+      year   : YEAR | undefined
+      url    : NAME           -- stored without "https://"; prefixed by search()
 
-    | last != empty  -- last name cannot be empty
+    -- Parameters passed to search()
+    SearchParams
+      last   : NAME
+      first  : NAME | undefined
+      middle : NAME | undefined
+      town   : NAME | undefined
+      year   : YEAR | undefined
 
-    search: WillsDatabase x SearchParams -> P WillRecord
+    -- Invariant: last name must be non-empty
+    ┌ SearchParams ──────────────────┐
+    │ last : NAME                    │
+    │ ─────────────────────────────  │
+    │ last ≠ ⟨⟩                      │
+    └────────────────────────────────┘
 
-    For all db: WillsDatabase; params: SearchParams:
-        params.last != empty =>
-            search(db, params) = { r: WillRecord | r.last = params.last AND matches(r, params) }
-        params.last = empty =>
-            search(db, params) = empty
+    -- Predicate: does record r satisfy all supplied parameters?
+    matches : WillRecord × SearchParams → BOOL
+    matches(r, p) ==
+        r.last = p.last
+        ∧  (p.first  = undefined  ∨  r.first  = p.first)
+        ∧  (p.middle = undefined  ∨  r.middle = p.middle)
+        ∧  (p.town   = undefined  ∨  r.town   = p.town)
+        ∧  (p.year   = undefined  ∨  r.year   = p.year)
+
+    -- Function signature
+    search : WillsDatabase × SearchParams → ℙ WillRecord
+
+    -- When last is non-empty, return all records that match
+    ∀ db : WillsDatabase; p : SearchParams •
+        p.last ≠ ⟨⟩  ⟹
+            search(db, p) = { r : WillRecord | r ∈ db.records ∧ matches(r, p) }
+
+    -- When last is empty, return nothing
+    ∀ db : WillsDatabase; p : SearchParams •
+        p.last = ⟨⟩  ⟹
+            search(db, p) = ∅
 
 =head1 LICENSE AND COPYRIGHT
 
 Copyright 2023-2026 Nigel Horne.
 
 Usage is subject to the GPL2 licence terms.
-If you use it,
-please let me know.
+If you use it, please let me know.
 
 =cut
 
