@@ -67,19 +67,28 @@ my $SEARCH_SCHEMA = {
 		type     => 'string',
 		optional => 1,
 		min      => 1,
-		max      => 100
+		max      => 100,
+		# Allows: word chars (Unicode \w), space, apostrophe (O'Brien),
+		# period (St. John), hyphen (Mary-Anne).
+		# Blocks: ; = | & < > \r \n \0 ` and other injection metacharacters.
+		# Primary SQL injection defence is parameterised queries; this adds
+		# defence-in-depth by rejecting obvious metacharacters before DB access.
+		matches  => qr/^[\w '.-]+\z/
 	},
 	'middle' => {
 		type     => 'string',
 		optional => 1,
 		min      => 1,
-		max      => 100
+		max      => 100,
+		matches  => qr/^[\w '.-]+\z/
 	},
 	'town' => {
 		type     => 'string',
 		optional => 1,
 		min      => 1,
-		max      => 100
+		max      => 100,
+		# Town format: "Canterbury, Kent, England" -- comma added to first/middle set.
+		matches  => qr/^[\w ',.-]+\z/
 	},
 	'year' => {
 		type     => 'integer',
@@ -322,7 +331,7 @@ C<Params::Validate::Strict> validation. The recognized parameters are:
 =head4 output
 
     # Return::Set is not used by new().
-    output => {
+    {
     	type => 'hashref',
 	optional => 1
     }
@@ -886,20 +895,53 @@ into SQL strings.
 
 =over 4
 
-=item * B<Finding 1: C<first>, C<middle>, C<town> have no character-set constraint>
+=item * B<Finding 1 (fixed): C<first>, C<middle>, C<town> now have C<matches> constraints>
 
-These optional fields are validated for type (string) and length (1-100)
-only. SQL injection characters such as C<'>, C<;>, C<-->, and C<UNION>
-pass C<Params::Validate::Strict> for these fields and are forwarded to
-the database layer verbatim.
+Previously these optional fields were validated for type and length only,
+allowing SQL metacharacters (C<;>, C<=>, C<|>, C<E<lt>>, C<E<gt>>,
+C<\r>, C<\n>, C<\0>) to reach the database layer verbatim.
 
-B<Current mitigation>: C<Database::Abstraction> uses DBI parameterised
-queries, so the values are bound safely regardless of their content.
+B<Applied fix>: the schema now enforces:
 
-B<Recommended defence-in-depth>: add C<matches> constraints to the schema
-for these fields, for example C<qr/^[\w\s\-,.]+$/>.
+    first/middle: matches => qr/^[\w '.-]+\z/
+    town:         matches => qr/^[\w ',.-]+\z/
+
+These allow legitimate name characters (Unicode word chars, space,
+apostrophe as in C<O'Brien>, period as in C<St. John>, hyphen as in
+C<Mary-Anne>, comma in town as in C<"Canterbury, Kent, England">) while
+blocking injection metacharacters.
+
+B<Residual surface>: the pattern C<Smith'-->, which contains only
+apostrophe and hyphens, passes the constraint. It is neutralised by
+C<Database::Abstraction>'s parameterised queries — the value is bound
+as a literal string, never interpolated into SQL.
+
+B<Primary defence>: parameterised queries (C<Database::Abstraction>).
+The C<matches> constraint is defence-in-depth only.
 
 B<Test coverage>: C<t/cgi_security.t>, section 10.
+
+=item * B<Finding 4: C<Genealogy__Wills__directory> environment variable can redirect the data directory>
+
+C<Object::Configure> reads environment variables of the form
+C<Genealogy__Wills__key> and merges them into the configuration before
+C<new()> applies defaults. Setting
+C<Genealogy__Wills__directory=/attacker/path> in the process environment
+redirects C<new()> to any SQLite file the attacker can create at that
+path, causing C<search()> to return results from a malicious database.
+
+B<Conditions required>: the attacker must control the process environment
+(C<%ENV>) before C<new()> is called. In a CGI context this requires
+compromising the web server's environment-variable namespace, not merely
+sending HTTP headers.
+
+B<Mitigation>: ensure the web server or process supervisor sanitises
+C<%ENV> before execution. The C<-d $dir && -r _> check in C<new()>
+prevents non-existent paths but does not block a readable
+attacker-controlled directory.
+
+B<Test coverage>: none (requires process-level ENV control; mocked ENV
+in tests does not reach C<Object::Configure>).
 
 =item * B<Finding 2 (fixed): C<matches =E<gt> qr/^[\w-]+\z/a> — Unicode and trailing-newline issues resolved>
 

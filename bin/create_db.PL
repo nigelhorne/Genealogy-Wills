@@ -58,8 +58,18 @@ if(-r $filename) {
 	unlink $filename;
 }
 
-my $cache_dir = $ENV{'CACHE_DIR'} || $ENV{'CACHEDIR'};
-if($cache_dir) {
+# $ENV{CACHE_DIR}/$ENV{CACHEDIR} is external input: validate before use in
+# file operations. A tainted or attacker-controlled path (e.g. ../../etc)
+# could cause mkdir or HTTP::Cache::Transparent to write outside the
+# intended cache tree. Only allow safe filesystem characters and reject
+# path traversal sequences.
+my $cache_dir_raw = $ENV{'CACHE_DIR'} // $ENV{'CACHEDIR'};
+my $cache_dir;
+if(defined $cache_dir_raw) {
+	unless($cache_dir_raw =~ /\A[\w.\-\/~]+\z/ && index($cache_dir_raw, '..') < 0) {
+		Carp::croak("Unsafe cache directory path in CACHE_DIR/CACHEDIR: $cache_dir_raw");
+	}
+	$cache_dir = $cache_dir_raw;
 	mkdir $cache_dir, 0700 if(!-d $cache_dir);
 	$cache_dir = File::Spec->catfile($cache_dir, 'http-cache-transparent');
 } else {
@@ -130,7 +140,9 @@ sub mrawson {
 	if($response->is_success) {
 		$data = $response->decoded_content();
 	} else {
-		die "\n$url: ", $response->status_line();
+		# status_line() comes from the upstream server; concatenate (not
+		# comma-list) to form one string before passing to Carp::croak.
+		Carp::croak("\n$url: " . $response->status_line());
 	}
 
 	$data =~ s/\r//g;

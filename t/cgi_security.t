@@ -334,66 +334,66 @@ subtest 'POST body simulation (in-memory STDIN)' => sub {
 };
 
 # ===========================================================================
-# SECTION 10 -- SQL injection via unconstrained fields (first, middle, town)
+# SECTION 10 -- SQL injection via optional fields (first, middle, town)
 #
-# FINDING: 'first', 'middle', and 'town' have no 'matches' PVS constraint.
-# SQL metacharacters (apostrophes, semicolons, UNION keywords) pass type
-# and length checks and reach the database layer unmodified.
-# This is only safe because Database::Abstraction uses prepared statements.
-# If Database::Abstraction ever regresses to string interpolation, these
-# fields become SQL injection vectors.
+# FINDING 1 APPLIED: matches constraints added to first, middle, town:
+#   first/middle: qr/^[\w '.-]+\z/   (word, space, apostrophe, period, hyphen)
+#   town:         qr/^[\w ',.-]+\z/  (same + comma for "Town, County, Country")
 #
-# These tests document the current pass-through behaviour and capture what
-# the DB layer actually receives, so a future regression would fail here.
+# SQL metacharacters outside those classes (=, ;, <, >, |, \r, \n, \0)
+# are now rejected by PVS before any data reaches the database layer.
+#
+# Primary SQL injection defence remains parameterised queries
+# (Database::Abstraction). The matches constraint is defence-in-depth.
+#
+# Residual surface: Smith'-- contains only apostrophe + hyphens (valid in
+# names) and passes the constraint, but is neutralised by parameterised
+# queries -- the value is bound as a literal, never interpolated into SQL.
 # ===========================================================================
 
-subtest 'SQL injection via unconstrained fields (first, middle, town)' => sub {
-	my %captured;
+subtest 'SQL injection via optional fields (matches constraint now rejects)' => sub {
+	# 'first': = sign is outside qr/^[\w '.-]+\z/
+	dies_ok(
+		sub { $obj->search(last => 'Smith', first => $SQL_INJECT_CLASSIC) },
+		"SQL injection (= in first) rejected by PVS matches constraint"
+	);
 
+	# 'town': ; is outside qr/^[\w ',.-]+\z/
+	dies_ok(
+		sub { $obj->search(last => 'Smith', town => $SQL_INJECT_DROP) },
+		"SQL injection (; in town) rejected by PVS matches constraint"
+	);
+
+	# 'middle': , is outside qr/^[\w '.-]+\z/ (comma not allowed in name fields)
+	dies_ok(
+		sub { $obj->search(last => 'Smith', middle => $SQL_INJECT_UNION) },
+		"SQL injection (, in middle) rejected by PVS matches constraint"
+	);
+
+	# Positive: legitimate name values that contain apostrophes/commas/periods
+	# must still be accepted -- the constraint must not over-reject valid data.
 	{
 		no warnings 'redefine';
-		# Capture params forwarded to the DB layer verbatim
-		local *Genealogy::Wills::wills::selectall_hashref = sub {
-			my (undef, $p) = @_;
-			%captured = %{$p};
-			return [];
-		};
+		local *Genealogy::Wills::wills::selectall_hashref = sub { [] };
 
-		# 'first': no matches constraint -- SQL chars pass PVS (type=string, max=100)
 		lives_ok(
-			sub {
-				my @r = $obj->search(last => 'Smith', first => $SQL_INJECT_CLASSIC);
-			},
-			"SQL injection in first passes PVS type+length (no matches constraint)"
+			sub { my @r = $obj->search(last => 'Smith', first  => "O'Brien") },
+			"first with apostrophe (O'Brien) accepted by matches"
 		);
-		is($captured{first}, $SQL_INJECT_CLASSIC,
-			'first value reaches DB layer verbatim -- module does NOT sanitise it');
-
-		# 'town': no matches constraint
 		lives_ok(
-			sub {
-				my @r = $obj->search(last => 'Smith', town => $SQL_INJECT_DROP);
-			},
-			"SQL injection in town passes PVS type+length (no matches constraint)"
+			sub { my @r = $obj->search(last => 'Jones', town   => 'Canterbury, Kent, England') },
+			"town with comma and space accepted by matches"
 		);
-		is($captured{town}, $SQL_INJECT_DROP,
-			'town value reaches DB layer verbatim -- module does NOT sanitise it');
-
-		# 'middle': no matches constraint
 		lives_ok(
-			sub {
-				my @r = $obj->search(last => 'Smith', middle => $SQL_INJECT_UNION);
-			},
-			"SQL injection in middle passes PVS type+length (no matches constraint)"
+			sub { my @r = $obj->search(last => 'Smith', middle => 'St. John') },
+			"middle with period and space accepted by matches"
 		);
-		is($captured{middle}, $SQL_INJECT_UNION,
-			'middle value reaches DB layer verbatim -- module does NOT sanitise it');
 	}
 
 	note(
-		'SECURITY NOTE: first/middle/town safety depends entirely on ' .
-		'Database::Abstraction using parameterised queries. ' .
-		'Adding matches => qr/^[\\w\\s\\-,]+$/ to these fields would provide defence-in-depth.'
+		"FINDING 1 APPLIED: first/middle/town now reject SQL metacharacters via PVS.\n" .
+		"Residual: Smith'-- passes (apostrophe + hyphens are valid name chars) " .
+		"but is neutralised by parameterised queries."
 	);
 };
 

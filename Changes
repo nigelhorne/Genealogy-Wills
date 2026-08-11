@@ -1,6 +1,29 @@
 Revision history for Genealogy::Wills
 
 0.11
+	[ Security ]
+	- Security audit S1 (MEDIUM, Finding 1 applied): add matches constraints to
+	  first/middle/town in $SEARCH_SCHEMA. first/middle: qr/^[\w '.-]+\z/ allows
+	  Unicode word chars, space, apostrophe, period, hyphen; blocks ;=|&<>\r\n\0.
+	  town: qr/^[\w ',.-]+\z/ additionally allows comma for "Town, County, Country"
+	  format. Primary defence remains parameterised queries (Database::Abstraction);
+	  matches constraints add defence-in-depth. Residual: Smith'-- passes (valid
+	  name chars) but is neutralised by parameterised queries.
+	- Security audit S1: update t/cgi_security.t section 10 from lives_ok
+	  (documenting pass-through) to dies_ok (asserting rejection at PVS level);
+	  remove is($captured{...}) assertions; add three positive tests confirming
+	  O'Brien, Canterbury, St. John still pass the new constraints.
+	- Security audit S2 (MEDIUM): sanitize $ENV{CACHE_DIR}/$ENV{CACHEDIR} in
+	  bin/create_db.PL before use in mkdir and File::Spec::catfile; validate with
+	  qr/\A[\w.\-\/~]+\z/ and index(..) < 0 (no .. traversal sequences); croak on
+	  invalid value.
+	- Security audit S3 (LOW): bin/create_db.PL: replace die on HTTP error with
+	  Carp::croak() for consistency with the documented croak/carp convention.
+	- Security audit S4 (MEDIUM/INFO): document Finding 4 in SECURITY POD:
+	  Object::Configure reads Genealogy__Wills__directory from %ENV before new()
+	  applies defaults, allowing a compromised process environment to redirect
+	  search() to an attacker-controlled SQLite file; note conditions and
+	  mitigations. No code change possible (design decision in Object::Configure).
 	[ Enhancements ]
 	- Regex audit: lib/Genealogy/Wills.pm: $MODULE_DATA_DIR s/\.pm$// → s/\.pm\z// (strict
 	  end-of-string; $ matches before trailing \n, \z does not)
