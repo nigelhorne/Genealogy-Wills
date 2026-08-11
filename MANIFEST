@@ -19,6 +19,7 @@ t/eol.t
 t/fixme.t
 t/lib/MyLogger.pm
 t/links.t
+t/locales.t
 t/no404s.t
 t/noopentickets.t
 t/noplan.t

@@ -8,12 +8,35 @@ Revision history for Genealogy::Wills
 	  directory fallback, optimised list-context return in search()
 	- Modernize bin/create_db.PL: remove old-style sub prototypes, replace SQL
 	  string-interpolation inserts with DBI prepared statements, state cache in normalise_name
+	- Add MAX_WILL_YEAR constant computed at load time; replaces hard-coded year max in
+	  search() validation schema so the bound stays current without manual updates
+	- Add =head1 LIMITATIONS POD section documenting ::new() behaviour, Sub::Private gap,
+	  load-time year cap, and single-source data limitation
+	- Enhance POD for new() and search() with EXAMPLE, API SPECIFICATION, MESSAGES,
+	  FORMAL SPECIFICATION, and PSEUDOCODE sub-sections
+	- Makefile.PL: remove unused File::Slurp, File::Basename, File::pfopen prerequisites;
+	  raise MIN_PERL_VERSION from 5.6.2 to 5.010 (required by use feature 'state')
+	- bin/create_db.PL: use Carp::croak instead of die; localize $| with local $| = 1
+	  to prevent output-buffering state leaking across calls; fix misleading memory comment
+	- Add t/locales.t: POSIX locale robustness tests verifying hardcoded error messages
+	  are locale-independent; uses $! directly (not POSIX::strerror) to avoid C-library
+	  divergence
 	[ Bug Fixes ]
 	- Work around MakeMaker copying to blib *before* running the script to build the files to go there
 	- search() now croaks with "Usage: ..." when called with no arguments
 	- new() now croaks with "Can't load configuration from ..." when the specified
 	  config_file does not exist or is not readable
 	- t/wills.t: HTTP URL checks now skip gracefully when the upstream site returns non-200
+	- use Carp () — prevent default Carp exports so all carp/croak calls stay
+	  fully-qualified and remain interceptable by Test::Carp at runtime; bare imported
+	  aliases (compile-time copies) bypassed the runtime override
+	- new() directory-not-found carp was a bare carp() call; changed to Carp::carp()
+	- search() sanitization regex s/[^\w\-']//g allowed apostrophes that the validation
+	  pattern qr/^[\w\-]+$/ rejects; fixed to s/[^\w\-]//g
+	- bin/create_db.PL: removed dead die check after DBI->connect with RaiseError=>1
+	  (DBI throws before returning undef); removed duplicate mkdir block
+	- t/carp.t: added test for new() directory-not-found carp path; restructured to
+	  avoid done_testing() inside SKIP conflicting with the outer test plan
 
 0.10	Sat Aug 23 20:34:26 EDT 2025
 	Fix return in scalar context

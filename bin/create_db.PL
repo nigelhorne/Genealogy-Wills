@@ -9,6 +9,7 @@ use strict;
 use warnings;
 use autodie qw(:all);
 use feature 'state';
+use Carp ();
 use DBI;
 use File::HomeDir;
 use File::Spec;
@@ -49,10 +50,6 @@ if(!-d $dir) {
 
 my $filename = File::Spec->catdir($dir, 'wills.sql');
 
-if(!-d $dir) {
-	mkdir $dir, 0755;
-}
-
 if(-r $filename) {
 	# Don't bother downloading if the file is less than a day old
 	if(((-s $filename) > 0) && (-M $filename < 1) && !$force_flag) {
@@ -75,16 +72,17 @@ HTTP::Cache::Transparent::init({
 	Verbose  => 0,
 	NoUpdate => 60 * 60 * 24 * 7 * 31,	# The archive never changes
 	MaxAge   => 30 * 24
-}) || die "$0: $cache_dir: $!";
+}) || Carp::croak("$0: $cache_dir: $!");
 
 my $ua = LWP::UserAgent::WithCache->new(timeout => 10, keep_alive => 1);
 $ua->env_proxy(1);
-$ua->agent('Genealogy::Wills');
+# $ua->agent('Genealogy::Wills');
+$ua->agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36');
 $ua->conn_cache()->total_capacity(undef);
 $Lingua::EN::NameCase::POSTNOMINAL = 0;
 
+# RaiseError => 1 means DBI throws on failure before ever returning undef
 my $dbh = DBI->connect("dbi:SQLite:dbname=$filename", undef, undef, { RaiseError => 1, AutoCommit => 0, synchronous => 0, locking_mode => 'EXCLUSIVE' });
-die "$filename: $!" if(!defined($dbh));
 
 $dbh->do('PRAGMA cache_size = -65536');	# 64MB
 $dbh->do('PRAGMA journal_mode = OFF');
@@ -123,9 +121,9 @@ sub mrawson {
 
 	my $url = "https://freepages.rootsweb.com/~mrawson/genealogy/will_$page.html";
 
-	$| = 1;
+	# local $| flushes immediately and restores on scope exit
+	local $| = 1;
 	printf "%-70s\r", $url;
-	$| = 0;
 
 	my $response = $ua->get($url);
 
@@ -208,11 +206,11 @@ sub flush {
 		try {
 			$sth->execute($first, $middle, $row->{'last'}, $row->{'town'}, $row->{'year'}, $row->{'url'});
 		} catch {
-			die "\nError in insert: $_";
+			Carp::croak("\nError in insert: $_");
 		};
 	}
 
-	@queue = ();	# Make sure Perl really frees all memory
+	@queue = ();	# Release references so GC can reclaim processed rows
 }
 
 # Reduce the very large number of calls to Lingua::EN::NameCase

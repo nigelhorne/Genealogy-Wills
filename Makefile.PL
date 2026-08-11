@@ -23,7 +23,7 @@ my @dirs = (
 	'lib/Genealogy/Wills/data'
 );
 
-# FIXME: AUTOMATED_TESTING - create the empty directory in blib
+# create_db.PL calls _sync_to_blib() on all exit paths to keep blib in sync
 foreach my $dir(@dirs) {
 	if(! -d $dir) {
 		print "Creating the download directory $dir\n";
@@ -45,9 +45,6 @@ my $prereqs = {
 	'DBD::SQLite::Constants' => 0,
 	'Error::Simple' => 0,
 	'ExtUtils::MakeMaker' => 6.64,	# Minimum version for TEST_REQUIRES
-	'File::Basename' => 0,
-	'File::pfopen' => 0,
-	'File::Slurp' => 0,
 	'File::Spec' => 0,
 	'File::Temp' => 0,
 	'Module::Info' => 0,
@@ -136,5 +133,5 @@ WriteMakefile(
 	},
 	# PPM_INSTALL_EXEC	=> 'perl',
 	# PPM_INSTALL_SCRIPT	=> 'bin/create_db.PL',
-	MIN_PERL_VERSION	=> '5.6.2'	# Probably would work, but never tested on earlier versions than this
+	MIN_PERL_VERSION	=> '5.010'	# use feature 'state' in create_db.PL requires 5.10
 );
