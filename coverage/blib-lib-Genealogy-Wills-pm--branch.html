@@ -25,19 +25,19 @@ https://pjcj.net
 <div><br/></div>
 <table>
 <tr><th>line</th><th>%</th><th colspan="2">coverage</th><th>branch</th></tr>
-<tr><td class="h"><a id="L367">367</a></td><td class="c0">50</td><td class="c0">T</td><td class="c3">F</td><td class="s">if (scalar @_ == 1 and not ref $_[0]) { }</td></tr>
-<tr><td class="h"><a id="L377">377</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (not defined $class) { }</td></tr>
+<tr><td class="h"><a id="L354">354</a></td><td class="c0">50</td><td class="c0">T</td><td class="c3">F</td><td class="s">if (scalar @_ == 1 and not ref $_[0]) { }</td></tr>
+<tr><td class="h"><a id="L364">364</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (not defined $class) { }</td></tr>
 <tr><td class="h"></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">elsif (&amp;blessed($class)) { }</td></tr>
-<tr><td class="h"><a id="L389">389</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (defined $$params{&quot;config_file&quot;} and not -r $$params{&quot;config_file&quot;})</td></tr>
-<tr><td class="h"><a id="L398">398</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless (-d $$params{&quot;directory&quot;} and -r _)</td></tr>
-<tr><td class="h"><a id="L403">403</a></td><td class="c0">50</td><td class="c3">T</td><td class="c0">F</td><td class="s">if (defined $$params{&quot;logger&quot;})</td></tr>
-<tr><td class="h"><a id="L406">406</a></td><td class="c0">50</td><td class="c0">T</td><td class="c3">F</td><td class="s">unless &amp;blessed($l) and $l-&gt;can(&quot;info&quot;) and $l-&gt;can(&quot;error&quot;)</td></tr>
-<tr><td class="h"><a id="L654">654</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless &amp;blessed($self)</td></tr>
-<tr><td class="h"><a id="L655">655</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless @_</td></tr>
-<tr><td class="h"><a id="L663">663</a></td><td class="c0">50</td><td class="c0">T</td><td class="c3">F</td><td class="s">unless (length($$params{&quot;last&quot;} // &quot;&quot;))</td></tr>
-<tr><td class="h"><a id="L672">672</a></td><td class="c0">50</td><td class="c0">T</td><td class="c3">F</td><td class="s">unless defined $$self{&quot;wills&quot;}</td></tr>
-<tr><td class="h"><a id="L674">674</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (wantarray)</td></tr>
-<tr><td class="h"><a id="L682">682</a></td><td class="c0">50</td><td class="c3">T</td><td class="c0">F</td><td class="s">if (defined(my $will = $$self{&quot;wills&quot;}-&gt;fetchrow_hashref($params)))</td></tr>
+<tr><td class="h"><a id="L376">376</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (defined $$params{&quot;config_file&quot;} and not -r $$params{&quot;config_file&quot;})</td></tr>
+<tr><td class="h"><a id="L385">385</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless (-d $$params{&quot;directory&quot;} and -r _)</td></tr>
+<tr><td class="h"><a id="L390">390</a></td><td class="c0">50</td><td class="c3">T</td><td class="c0">F</td><td class="s">if (defined $$params{&quot;logger&quot;})</td></tr>
+<tr><td class="h"><a id="L393">393</a></td><td class="c0">50</td><td class="c0">T</td><td class="c3">F</td><td class="s">unless &amp;blessed($l) and $l-&gt;can(&quot;info&quot;) and $l-&gt;can(&quot;error&quot;)</td></tr>
+<tr><td class="h"><a id="L641">641</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless &amp;blessed($self)</td></tr>
+<tr><td class="h"><a id="L642">642</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless @_</td></tr>
+<tr><td class="h"><a id="L650">650</a></td><td class="c0">50</td><td class="c0">T</td><td class="c3">F</td><td class="s">unless (length($$params{&quot;last&quot;} // &quot;&quot;))</td></tr>
+<tr><td class="h"><a id="L659">659</a></td><td class="c0">50</td><td class="c0">T</td><td class="c3">F</td><td class="s">unless defined $$self{&quot;wills&quot;}</td></tr>
+<tr><td class="h"><a id="L661">661</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (wantarray)</td></tr>
+<tr><td class="h"><a id="L668">668</a></td><td class="c0">50</td><td class="c3">T</td><td class="c0">F</td><td class="s">if (defined(my $will = $$self{&quot;wills&quot;}-&gt;fetchrow_hashref($params)))</td></tr>
 </table>
 </body>
 </html>
