@@ -1,0 +1,399 @@
+{
+   "runs" : [
+      {
+         "OS" : "linux",
+         "abstract" : "Search a local database of historical wills",
+         "dir" : "/home/runner/work/Genealogy-Wills/Genealogy-Wills",
+         "finish" : 1786458737.84721,
+         "name" : "Genealogy-Wills",
+         "perl" : "5.40.4",
+         "run" : "-e",
+         "start" : 1786458731.00069,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Search a local database of historical wills",
+         "dir" : "/home/runner/work/Genealogy-Wills/Genealogy-Wills",
+         "finish" : 1786458731.12694,
+         "name" : "Genealogy-Wills",
+         "perl" : "5.40.4",
+         "run" : "-e",
+         "start" : 1786458731.12681,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Search a local database of historical wills",
+         "dir" : "/home/runner/work/Genealogy-Wills/Genealogy-Wills",
+         "finish" : 1786458731.48021,
+         "name" : "Genealogy-Wills",
+         "perl" : "5.40.4",
+         "run" : "t/00-load.t",
+         "start" : 1786458731.47889,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Search a local database of historical wills",
+         "dir" : "/home/runner/work/Genealogy-Wills/Genealogy-Wills",
+         "finish" : 1786458731.87087,
+         "name" : "Genealogy-Wills",
+         "perl" : "5.40.4",
+         "run" : "t/10-new.t",
+         "start" : 1786458731.74509,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Search a local database of historical wills",
+         "dir" : "/home/runner/work/Genealogy-Wills/Genealogy-Wills",
+         "finish" : 1786458732.2975,
+         "name" : "Genealogy-Wills",
+         "perl" : "5.40.4",
+         "run" : "t/30-basics.t",
+         "start" : 1786458732.28479,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Search a local database of historical wills",
+         "dir" : "/home/runner/work/Genealogy-Wills/Genealogy-Wills",
+         "finish" : 1786458732.71593,
+         "name" : "Genealogy-Wills",
+         "perl" : "5.40.4",
+         "run" : "t/carp.t",
+         "start" : 1786458732.71169,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Search a local database of historical wills",
+         "dir" : "/home/runner/work/Genealogy-Wills/Genealogy-Wills",
+         "finish" : 1786458732.97837,
+         "name" : "Genealogy-Wills",
+         "perl" : "5.40.4",
+         "run" : "t/comment-spelling.t",
+         "start" : 1786458732.97814,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Search a local database of historical wills",
+         "dir" : "/home/runner/work/Genealogy-Wills/Genealogy-Wills",
+         "finish" : 1786458733.38782,
+         "name" : "Genealogy-Wills",
+         "perl" : "5.40.4",
+         "run" : "t/config_file.t",
+         "start" : 1786458733.20968,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Search a local database of historical wills",
+         "dir" : "/home/runner/work/Genealogy-Wills/Genealogy-Wills",
+         "finish" : 1786458733.6552,
+         "name" : "Genealogy-Wills",
+         "perl" : "5.40.4",
+         "run" : "t/critic.t",
+         "start" : 1786458733.65497,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Search a local database of historical wills",
+         "dir" : "/home/runner/work/Genealogy-Wills/Genealogy-Wills",
+         "finish" : 1786458733.85684,
+         "name" : "Genealogy-Wills",
+         "perl" : "5.40.4",
+         "run" : "t/eof.t",
+         "start" : 1786458733.85659,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Search a local database of historical wills",
+         "dir" : "/home/runner/work/Genealogy-Wills/Genealogy-Wills",
+         "finish" : 1786458734.05765,
+         "name" : "Genealogy-Wills",
+         "perl" : "5.40.4",
+         "run" : "t/eol.t",
+         "start" : 1786458734.05741,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Search a local database of historical wills",
+         "dir" : "/home/runner/work/Genealogy-Wills/Genealogy-Wills",
+         "finish" : 1786458734.28246,
+         "name" : "Genealogy-Wills",
+         "perl" : "5.40.4",
+         "run" : "t/fixme.t",
+         "start" : 1786458734.28182,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Search a local database of historical wills",
+         "dir" : "/home/runner/work/Genealogy-Wills/Genealogy-Wills",
+         "finish" : 1786458734.65171,
+         "name" : "Genealogy-Wills",
+         "perl" : "5.40.4",
+         "run" : "t/locales.t",
+         "start" : 1786458734.64591,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Search a local database of historical wills",
+         "dir" : "/home/runner/work/Genealogy-Wills/Genealogy-Wills",
+         "finish" : 1786458734.91387,
+         "name" : "Genealogy-Wills",
+         "perl" : "5.40.4",
+         "run" : "t/no404s.t",
+         "start" : 1786458734.91362,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Search a local database of historical wills",
+         "dir" : "/home/runner/work/Genealogy-Wills/Genealogy-Wills",
+         "finish" : 1786458735.13676,
+         "name" : "Genealogy-Wills",
+         "perl" : "5.40.4",
+         "run" : "t/noopentickets.t",
+         "start" : 1786458735.13568,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Search a local database of historical wills",
+         "dir" : "/home/runner/work/Genealogy-Wills/Genealogy-Wills",
+         "finish" : 1786458735.35374,
+         "name" : "Genealogy-Wills",
+         "perl" : "5.40.4",
+         "run" : "t/noplan.t",
+         "start" : 1786458735.35347,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Search a local database of historical wills",
+         "dir" : "/home/runner/work/Genealogy-Wills/Genealogy-Wills",
+         "finish" : 1786458735.57584,
+         "name" : "Genealogy-Wills",
+         "perl" : "5.40.4",
+         "run" : "t/pod-cm.t",
+         "start" : 1786458735.57506,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Search a local database of historical wills",
+         "dir" : "/home/runner/work/Genealogy-Wills/Genealogy-Wills",
+         "finish" : 1786458735.78366,
+         "name" : "Genealogy-Wills",
+         "perl" : "5.40.4",
+         "run" : "t/pod-coverage.t",
+         "start" : 1786458735.78341,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Search a local database of historical wills",
+         "dir" : "/home/runner/work/Genealogy-Wills/Genealogy-Wills",
+         "finish" : 1786458735.98526,
+         "name" : "Genealogy-Wills",
+         "perl" : "5.40.4",
+         "run" : "t/pod-links.t",
+         "start" : 1786458735.98501,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Search a local database of historical wills",
+         "dir" : "/home/runner/work/Genealogy-Wills/Genealogy-Wills",
+         "finish" : 1786458736.19,
+         "name" : "Genealogy-Wills",
+         "perl" : "5.40.4",
+         "run" : "t/pod-snippets.t",
+         "start" : 1786458736.18976,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Search a local database of historical wills",
+         "dir" : "/home/runner/work/Genealogy-Wills/Genealogy-Wills",
+         "finish" : 1786458736.39213,
+         "name" : "Genealogy-Wills",
+         "perl" : "5.40.4",
+         "run" : "t/pod-spelling.t",
+         "start" : 1786458736.39187,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Search a local database of historical wills",
+         "dir" : "/home/runner/work/Genealogy-Wills/Genealogy-Wills",
+         "finish" : 1786458736.59334,
+         "name" : "Genealogy-Wills",
+         "perl" : "5.40.4",
+         "run" : "t/pod-synopsis.t",
+         "start" : 1786458736.59309,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Search a local database of historical wills",
+         "dir" : "/home/runner/work/Genealogy-Wills/Genealogy-Wills",
+         "finish" : 1786458736.79475,
+         "name" : "Genealogy-Wills",
+         "perl" : "5.40.4",
+         "run" : "t/pod.t",
+         "start" : 1786458736.79449,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Search a local database of historical wills",
+         "dir" : "/home/runner/work/Genealogy-Wills/Genealogy-Wills",
+         "finish" : 1786458736.99494,
+         "name" : "Genealogy-Wills",
+         "perl" : "5.40.4",
+         "run" : "t/strict.t",
+         "start" : 1786458736.9947,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Search a local database of historical wills",
+         "dir" : "/home/runner/work/Genealogy-Wills/Genealogy-Wills",
+         "finish" : 1786458737.19485,
+         "name" : "Genealogy-Wills",
+         "perl" : "5.40.4",
+         "run" : "t/unused.t",
+         "start" : 1786458737.19462,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Search a local database of historical wills",
+         "dir" : "/home/runner/work/Genealogy-Wills/Genealogy-Wills",
+         "finish" : 1786458737.39586,
+         "name" : "Genealogy-Wills",
+         "perl" : "5.40.4",
+         "run" : "t/vars.t",
+         "start" : 1786458737.39561,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Search a local database of historical wills",
+         "dir" : "/home/runner/work/Genealogy-Wills/Genealogy-Wills",
+         "finish" : 1786458737.59719,
+         "name" : "Genealogy-Wills",
+         "perl" : "5.40.4",
+         "run" : "t/version.t",
+         "start" : 1786458737.59694,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Search a local database of historical wills",
+         "dir" : "/home/runner/work/Genealogy-Wills/Genealogy-Wills",
+         "finish" : 1786458737.80705,
+         "name" : "Genealogy-Wills",
+         "perl" : "5.40.4",
+         "run" : "t/wills.t",
+         "start" : 1786458737.80679,
+         "version" : "0.10"
+      }
+   ],
+   "summary" : {
+      "Total" : {
+         "branch" : {
+            "covered" : 21,
+            "error" : 7,
+            "percentage" : 75,
+            "total" : 28,
+            "uncoverable" : 0
+         },
+         "condition" : {
+            "covered" : 14,
+            "error" : 10,
+            "percentage" : 58.3333333333333,
+            "total" : 24,
+            "uncoverable" : 0
+         },
+         "statement" : {
+            "covered" : 96,
+            "error" : 4,
+            "percentage" : 96,
+            "total" : 100
+         },
+         "subroutine" : {
+            "covered" : 19,
+            "percentage" : 100,
+            "total" : 19
+         },
+         "total" : {
+            "covered" : 150,
+            "error" : 21,
+            "percentage" : 87.719298245614,
+            "total" : 171,
+            "uncoverable" : 0
+         }
+      },
+      "blib/lib/Genealogy/Wills.pm" : {
+         "branch" : {
+            "covered" : 21,
+            "error" : 7,
+            "percentage" : 75,
+            "total" : 28,
+            "uncoverable" : 0
+         },
+         "condition" : {
+            "covered" : 14,
+            "error" : 10,
+            "percentage" : 58.3333333333333,
+            "total" : 24,
+            "uncoverable" : 0
+         },
+         "statement" : {
+            "covered" : 87,
+            "error" : 4,
+            "percentage" : 95.6043956043956,
+            "total" : 91
+         },
+         "subroutine" : {
+            "covered" : 16,
+            "percentage" : 100,
+            "total" : 16
+         },
+         "total" : {
+            "covered" : 138,
+            "error" : 21,
+            "percentage" : 86.7924528301887,
+            "total" : 159,
+            "uncoverable" : 0
+         }
+      },
+      "blib/lib/Genealogy/Wills/wills.pm" : {
+         "statement" : {
+            "covered" : 9,
+            "percentage" : 100,
+            "total" : 9
+         },
+         "subroutine" : {
+            "covered" : 3,
+            "percentage" : 100,
+            "total" : 3
+         },
+         "total" : {
+            "covered" : 12,
+            "percentage" : 100,
+            "total" : 12
+         }
+      }
+   }
+}
