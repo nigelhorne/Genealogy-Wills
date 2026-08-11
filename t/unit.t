@@ -4,6 +4,7 @@ use warnings;
 use File::Temp qw(tempdir);
 use Readonly;
 use Scalar::Util qw(blessed);
+use Test::Needs 'Test::Mockingbird';
 use Test::Mockingbird;
 use Test::Most;
 use Test::Returns;
@@ -484,8 +485,8 @@ subtest 'search() -- does not clobber $@ (eval error variable)' => sub {
 # =======================================================================
 
 subtest 'Genealogy::Wills::wills -- VERSION matches POD' => sub {
-	is($Genealogy::Wills::wills::VERSION, '0.10',
-		'VERSION matches the value declared in the POD');
+	is($Genealogy::Wills::wills::VERSION, $Genealogy::Wills::VERSION,
+		'VERSION matches the parent module version');
 };
 
 subtest 'Genealogy::Wills::wills -- ISA Database::Abstraction' => sub {

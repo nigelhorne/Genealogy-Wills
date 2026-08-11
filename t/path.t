@@ -5,6 +5,7 @@ use File::Spec;
 use File::Temp qw(tempdir tempfile);
 use Readonly;
 use Scalar::Util qw(blessed);
+use Test::Needs 'Test::Mockingbird';
 use Test::Mockingbird;
 use Test::Most;
 use Test::Returns;

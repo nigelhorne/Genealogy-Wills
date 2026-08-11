@@ -5,6 +5,7 @@ use File::Temp qw(tempdir);
 use Genealogy::Wills;
 use Readonly;
 use Test::Memory::Cycle;
+use Test::Needs 'Test::Mockingbird';
 use Test::Mockingbird;
 use Test::Most;
 use Test::Returns;

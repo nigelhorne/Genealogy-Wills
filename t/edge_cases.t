@@ -4,6 +4,7 @@ use warnings;
 use File::Temp qw(tempdir tempfile);
 use Readonly;
 use Scalar::Util qw(blessed weaken);
+use Test::Needs 'Test::Mockingbird';
 use Test::Mockingbird;
 use Test::Most;
 use Test::Returns;

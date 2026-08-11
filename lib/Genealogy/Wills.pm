@@ -26,11 +26,11 @@ Genealogy::Wills - Search a local database of historical wills
 
 =head1 VERSION
 
-Version 0.10
+Version 0.11
 
 =cut
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 # Named constants remove all magic literals from the code body.
 # Readonly enforces immutability at runtime; any attempted mutation dies.

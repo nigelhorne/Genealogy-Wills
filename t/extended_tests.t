@@ -3,6 +3,7 @@ use warnings;
 
 use File::Temp qw(tempdir);
 use Readonly;
+use Test::Needs 'Test::Mockingbird';
 use Test::Mockingbird;
 use Test::Most;
 use Test::Returns;

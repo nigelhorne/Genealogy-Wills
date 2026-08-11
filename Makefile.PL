@@ -37,16 +37,12 @@ foreach my $dir(@dirs) {
 
 my $prereqs = {
 	'autodie' => 0,
-	'constant' => 0,
 	'Carp' => 0,
 	'Data::Reuse' => 0,
 	'Database::Abstraction' => 0.37,
 	'DBD::SQLite' => 0,
-	'DBD::SQLite::Constants' => 0,
-	'Error::Simple' => 0,
 	'ExtUtils::MakeMaker' => 6.64,	# Minimum version for TEST_REQUIRES
 	'File::Spec' => 0,
-	'File::Temp' => 0,
 	'Object::Configure' => 0.23,
 	'Params::Get' => 0.16,
 	'Params::Validate::Strict' => 0.37,
@@ -59,7 +55,6 @@ my $prereqs = {
 unless(defined($ENV{'AUTOMATED_TESTING'})) {
 	$prereqs->{'DBI'} = 0;
 	$prereqs->{'File::HomeDir'} = 0;
-	$prereqs->{'HTML::Entities'} = 0;
 	$prereqs->{'HTTP::Cache::Transparent'} = 0;
 	$prereqs->{'LWP::ConnCache'} = 0;
 	$prereqs->{'LWP::Protocol::https'} = 0;
@@ -85,7 +80,7 @@ WriteMakefile(
 	ABSTRACT_FROM	=> 'lib/Genealogy/Wills.pm',
 	((defined($ExtUtils::MakeMaker::VERSION) &&
 	 ($ExtUtils::MakeMaker::VERSION >= 6.3002))
-	  ? ('LICENSE'=> 'GPL')
+	  ? ('LICENSE'=> 'gpl_2')
 	  : ()),
 	'LIBS' => [''],   # e.g., '-lm'
 	'DEFINE' => '',     # e.g., '-DHAVE_SOMETHING'
@@ -122,19 +117,19 @@ WriteMakefile(
 		resources => {
 			repository => {
 				type => 'git',
-				url => 'git://github.com/nigelhorne/Genealogy-Wills.git',
+				url => 'https://github.com/nigelhorne/Genealogy-Wills.git',
 				web => 'https://github.com/nigelhorne/Genealogy-Wills',
 				repository => 'https://github.com/nigelhorne/Genealogy-Wills',
-			},
-			bugtracker => {
+			}, bugtracker => {
 				url => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Genealogy-Wills',
 				web => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Genealogy-Wills',
 				# web => 'https://github.com/nigelhorne/Genealogy-Wills/issues',
 				mailto => 'bug-Genealogy-Wills@rt.cpan.org'
-			}, homepage => 'https://sites.rootsweb.com/~obituary',
+			},
+			homepage => 'https://sites.rootsweb.com/~obituary',
 		},
 	},
 	# PPM_INSTALL_EXEC	=> 'perl',
 	# PPM_INSTALL_SCRIPT	=> 'bin/create_db.PL',
-	MIN_PERL_VERSION	=> '5.010'	# use feature 'state' in create_db.PL requires 5.10
+	MIN_PERL_VERSION	=> '5.010001'	# autodie qw(:all) requires 5.10.1; use feature 'state' requires 5.10
 );

@@ -4,7 +4,7 @@ Genealogy::Wills - Search a local database of historical wills
 
 # VERSION
 
-Version 0.10
+Version 0.11
 
 # DESCRIPTION
 
