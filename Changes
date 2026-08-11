@@ -4,8 +4,16 @@ Revision history for Genealogy::Wills
 	[ Enhancements ]
 	- Bump minimum versions
 	- Added the test dashboard
+	- Modernize Genealogy::Wills.pm: use autodie, explicit Scalar::Util import, simplified
+	  directory fallback, optimised list-context return in search()
+	- Modernize bin/create_db.PL: remove old-style sub prototypes, replace SQL
+	  string-interpolation inserts with DBI prepared statements, state cache in normalise_name
 	[ Bug Fixes ]
 	- Work around MakeMaker copying to blib *before* running the script to build the files to go there
+	- search() now croaks with "Usage: ..." when called with no arguments
+	- new() now croaks with "Can't load configuration from ..." when the specified
+	  config_file does not exist or is not readable
+	- t/wills.t: HTTP URL checks now skip gracefully when the upstream site returns non-200
 
 0.10	Sat Aug 23 20:34:26 EDT 2025
 	Fix return in scalar context

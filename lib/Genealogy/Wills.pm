@@ -1,7 +1,8 @@
 package Genealogy::Wills;
 
-use warnings;
 use strict;
+use warnings;
+use autodie qw(:all);
 use Carp;
 use Data::Reuse;
 use File::Spec;
@@ -11,7 +12,7 @@ use Object::Configure 0.23;
 use Params::Get 0.16;
 use Params::Validate::Strict 0.37;
 use Return::Set 0.05;
-use Scalar::Util;
+use Scalar::Util qw(blessed);
 
 =head1 NAME
 
@@ -25,7 +26,6 @@ Version 0.10
 
 our $VERSION = '0.10';
 
-# Class-level constants
 use constant {
 	DEFAULT_CACHE_DURATION => '1 day',	# The database is updated daily
 	MIN_LAST_NAME_LENGTH   => 1,
@@ -66,11 +66,12 @@ Points to a configuration file which contains the parameters to C<new()>.
 The file can be in any common format,
 including C<YAML>, C<XML>, and C<INI>.
 This allows the parameters to be set at run time.
+Croaks if the path is specified but the file does not exist or is not readable.
 
 =item * C<directory>
 
 That is the directory containing wills.sql.
-If not given, the use the module's data directory.
+If not given, uses the module's own data directory.
 
 =item * C<logger>
 
@@ -80,12 +81,10 @@ An object to send log messages to
 
 =cut
 
-sub new
-{
+sub new {
 	my $class = shift;
 	my $params;
 
-	# Handle hash or hashref arguments
 	if((scalar(@_) == 1) && !ref($_[0])) {
 		$params->{'directory'} = $_[0];
 	} else {
@@ -101,7 +100,7 @@ sub new
 
 		# FIXME: this only works when no arguments are given
 		$class = __PACKAGE__;
-	} elsif(Scalar::Util::blessed($class)) {
+	} elsif(blessed($class)) {
 		# clone the given object
 		if($params) {
 			return bless { %{$class}, %{$params} }, ref($class);
@@ -109,32 +108,29 @@ sub new
 		return bless $class, ref($class);
 	}
 
-	# Load the configuration from a config file, if provided
 	if(defined($params->{'config_file'}) && !-r $params->{'config_file'}) {
 		Carp::croak("Can't load configuration from " . $params->{'config_file'});
 	}
 	$params = Object::Configure::configure($class, $params);
 
-	if(!defined(my $directory = ($params->{'directory'} || $Genealogy::Wills::wills->{'directory'}))) {
-		# If the directory argument isn't given, see if we can find the data
-		$directory ||= Module::Info->new_from_loaded(__PACKAGE__)->file();
-		$directory =~ s/\.pm$//;
-		$params->{'directory'} = File::Spec->catfile($directory, 'data');
+	unless($params->{'directory'}) {
+		my $module_file = Module::Info->new_from_loaded(__PACKAGE__)->file();
+		(my $module_dir = $module_file) =~ s/\.pm$//;
+		$params->{'directory'} = File::Spec->catfile($module_dir, 'data');
 	}
 
 	unless((-d $params->{'directory'}) && (-r $params->{'directory'})) {
-		Carp::carp(__PACKAGE__, ': ', $params->{'directory'}, ' is not a directory');
+		carp(__PACKAGE__, ': ', $params->{'directory'}, ' is not a directory');
 		return;
 	}
 
-	# Validate logger object has required methods
 	if(defined $params->{'logger'}) {
-		unless(Scalar::Util::blessed($params->{'logger'}) && $params->{'logger'}->can('info') && $params->{'logger'}->can('error')) {
-			Carp::croak("Logger must be an object with info() and error() methods");
+		unless(blessed($params->{'logger'}) && $params->{'logger'}->can('info') && $params->{'logger'}->can('error')) {
+			Carp::croak('Logger must be an object with info() and error() methods');
 		}
 	}
 
-	# cache_duration can be overriden by the args
+	# cache_duration can be overridden by the args
 	return bless {
 		cache_duration => DEFAULT_CACHE_DURATION,
 		%{$params}
@@ -143,17 +139,20 @@ sub new
 
 =head2 search
 
-Last (last name) is a mandatory parameter.
+C<last> (last name) is a mandatory parameter.
+It must be a non-empty string containing only word characters (C<\w>) and hyphens.
+Croaks if called with no arguments at all.
 
-Return a list of hash references in list context,
-or a hash reference in scalar context.
+Returns a list of hash references in list context,
+or a single hash reference in scalar context.
+Returns nothing if no records match.
 
-Each record includes a formatted C<url> field.
+Each record includes a C<url> field with the C<https://> scheme prepended.
 
     my $wills = Genealogy::Wills->new();
 
-    # Returns an array of hashrefs
-    my @smiths = $wills->search(last => 'Smith');	# You must at least define the last name to search for
+    my @smiths = $wills->search(last => 'Smith');
+    my @joneses = $wills->search({ first => 'Mary', last => 'Jones', year => 1750 });
 
     print $smiths[0]->{'first'}, "\n";
 
@@ -162,73 +161,68 @@ Each record includes a formatted C<url> field.
 sub search {
 	my $self = shift;
 
-	# Ensure $self is valid
-	Carp::croak('search() must be called on an object') unless(Scalar::Util::blessed($self));
-
+	Carp::croak('search() must be called on an object') unless blessed($self);
 	Carp::croak('Usage: search({ last => $last_name })') unless @_;
 
-        my $params = Params::Validate::Strict::validate_strict({
-		args => Params::Get::get_params('last', @_),
+	my $params = Params::Validate::Strict::validate_strict({
+		args   => Params::Get::get_params('last', @_),
 		schema => {
 			'last' => {
-				type => 'string',
-				min => 1,
-				max => 100,
-				matches => qr/^[\w\-]+$/	# Allow hyphens in surnames
-			}, 'first' => {
-				type => 'string',
+				type    => 'string',
+				min     => MIN_LAST_NAME_LENGTH,
+				max     => MAX_LAST_NAME_LENGTH,
+				matches => qr/^[\w\-]+$/
+			},
+			'first' => {
+				type     => 'string',
 				optional => 1,
-				min => 1,
-				max => 100
-			}, 'middle' => {
-				type => 'string',
+				min      => 1,
+				max      => 100
+			},
+			'middle' => {
+				type     => 'string',
 				optional => 1,
-				min => 1,
-				max => 100
-			}, 'town' => {
-				type => 'string',
+				min      => 1,
+				max      => 100
+			},
+			'town' => {
+				type     => 'string',
 				optional => 1,
-				min => 1,
-				max => 100
-			}, 'year' => {
-				type => 'integer',
+				min      => 1,
+				max      => 100
+			},
+			'year' => {
+				type     => 'integer',
 				optional => 1,
-				min => 1,
-				max => 2025
+				min      => 1,
+				max      => 2025
 			}
 		}
 	});
 
-	# Validate required parameters thoroughly
-	unless((defined($params->{'last'})) && (length($params->{'last'}) > 0)) {
+	unless(length($params->{'last'} // '')) {
 		Carp::carp("Value for 'last' is mandatory");
 		return;
 	}
 
-	# Sanitize input to prevent SQL injection
-	$params->{'last'} =~ s/[^\w\s\-']//g;	# Allow only word chars, spaces, hyphens, apostrophes
+	# Defence in depth: strip chars not matched by validation regex
+	$params->{'last'} =~ s/[^\w\-']//g;
 
 	$self->{'wills'} ||= Genealogy::Wills::wills->new(no_entry => 1, no_fixate => 1, %{$self});
 
-	if(!defined($self->{'wills'})) {
-		Carp::croak("Can't open the wills database");
-	}
+	Carp::croak("Can't open the wills database") unless defined($self->{'wills'});
 
 	if(wantarray) {
-		if(my $willslist = $self->{'wills'}->selectall_hashref($params)) {
-			my @wills = @{$willslist};
-			foreach my $will(@wills) {
-				$will->{'url'} = 'https://' . $will->{'url'};
-			}
-			Data::Reuse::fixate(@wills);
-			return @wills;
+		if(my $wills = $self->{'wills'}->selectall_hashref($params)) {
+			$_->{'url'} = 'https://' . $_->{'url'} for @{$wills};
+			Data::Reuse::fixate(@{$wills});
+			return @{$wills};
 		}
 		return;
 	}
 	if(defined(my $will = $self->{'wills'}->fetchrow_hashref($params))) {
 		$will->{'url'} = 'https://' . $will->{'url'};
 		Data::Reuse::fixate(%{$will});
-
 		return Return::Set::set_return($will, { 'type' => 'hashref', 'min' => 1 });
 	}
 }
@@ -283,6 +277,8 @@ The Kent Wills Transcript, L<https://freepages.rootsweb.com/~mrawson/genealogy/w
 
 =head1 SUPPORT
 
+This module is provided as-is without any warranty.
+
 You can find documentation for this module with the perldoc command.
 
     perldoc Genealogy::Wills
@@ -311,9 +307,11 @@ L<http://deps.cpantesters.org/?module=Genealogy::Wills>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2023-2025 Nigel Horne.
+Copyright 2023-2026 Nigel Horne.
 
-This program is released under the following licence: GPL2
+Usage is subject to the GPL2 licence terms.
+If you use it,
+please let me know.
 
 =cut
 

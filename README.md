@@ -38,11 +38,12 @@ which can be hash, hash-ref or key-value pairs.
     The file can be in any common format,
     including `YAML`, `XML`, and `INI`.
     This allows the parameters to be set at run time.
+    Croaks if the path is specified but the file does not exist or is not readable.
 
 - `directory`
 
     That is the directory containing wills.sql.
-    If not given, the use the module's data directory.
+    If not given, uses the module's own data directory.
 
 - `logger`
 
@@ -50,17 +51,20 @@ which can be hash, hash-ref or key-value pairs.
 
 ## search
 
-Last (last name) is a mandatory parameter.
+`last` (last name) is a mandatory parameter.
+It must be a non-empty string containing only word characters (`\w`) and hyphens.
+Croaks if called with no arguments at all.
 
-Return a list of hash references in list context,
-or a hash reference in scalar context.
+Returns a list of hash references in list context,
+or a single hash reference in scalar context.
+Returns nothing if no records match.
 
-Each record includes a formatted `url` field.
+Each record includes a `url` field with the `https://` scheme prepended.
 
     my $wills = Genealogy::Wills->new();
 
-    # Returns an array of hashrefs
-    my @smiths = $wills->search(last => 'Smith');       # You must at least define the last name to search for
+    my @smiths = $wills->search(last => 'Smith');
+    my @joneses = $wills->search({ first => 'Mary', last => 'Jones', year => 1750 });
 
     print $smiths[0]->{'first'}, "\n";
 
@@ -112,6 +116,8 @@ The Kent Wills Transcript, [https://freepages.rootsweb.com/~mrawson/genealogy/wi
 
 # SUPPORT
 
+This module is provided as-is without any warranty.
+
 You can find documentation for this module with the perldoc command.
 
     perldoc Genealogy::Wills
@@ -136,6 +142,8 @@ You can also look for information at:
 
 # LICENSE AND COPYRIGHT
 
-Copyright 2023-2025 Nigel Horne.
+Copyright 2023-2026 Nigel Horne.
 
-This program is released under the following licence: GPL2
+Usage is subject to the GPL2 licence terms.
+If you use it,
+please let me know.
