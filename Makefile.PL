@@ -92,10 +92,12 @@ WriteMakefile(
 	PL_FILES => (defined($ENV{'AUTOMATED_TESTING'}) ? {} : {'bin/create_db.PL' => 'bin/create_db'}),
 	CONFIGURE_REQUIRES => {
 		'ExtUtils::MakeMaker' => 6.64,	# Minimum version for TEST_REQUIRES
-	}, TEST_REQUIRES => {
+	}, PREREQ_PM => $prereqs,
+	TEST_REQUIRES => {
 		'File::Temp' => 0,
 		'Test::Carp' => 0,
 		'Test::DescribeMe' => 0,
+		'Test::Memory::Cycle' => 0,
 		'Test::Most' => 0,
 		'Test::Needs' => 0,
 		'Test::Returns' => 0,
@@ -103,8 +105,7 @@ WriteMakefile(
 		# 'Test::Kwalitee' => 0,
 		'IPC::System::Simple' => 0,
 		'YAML::Any' => 0
-	}, PREREQ_PM => $prereqs,
-	dist => $dist,
+	}, dist => $dist,
 	clean => { FILES => 'Genealogy-Wills-*' },
 	realclean => {
 		# This would seem logical, but it will break "make && make test" even though you don't call "make realclean"
