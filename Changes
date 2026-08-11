@@ -80,6 +80,18 @@ Revision history for Genealogy::Wills
 	- bin/create_db.PL: refactor queue() alias/slash if/elsif: both branches had an
 	  identical two-line body (push @queue + $last=$2); now captures ($alt, $primary)
 	  in the pattern-match phase and executes the shared action once
+	- Add t/integration.t: 23-subtest end-to-end integration suite. Covers: complete
+	  new()->search() workflows in list and scalar context; bare-string, hashref, and
+	  named-arg argument forms; config-file-driven construction (YAML); ENV override
+	  (Genealogy__Wills__directory) taking precedence over config; clone (instance->new())
+	  lifecycle; two independent objects not sharing wills DB slots; cross-module
+	  interaction verification via spy on Data::Reuse::fixate and call-counting mock on
+	  Genealogy::Wills::wills::new() (confirms lazy-init fires exactly once per object);
+	  capturing mock on selectall_hashref confirming all five search fields forwarded
+	  verbatim; url-decoration invariant (https:// prepended exactly once in both list
+	  and scalar contexts); all documented error paths (bad directory, bad config_file,
+	  bad logger, DB-init failure, class-method call, no-argument call); note documenting
+	  absence of optional runtime dependencies
 	[ Bug Fixes ]
 	- lib/Genealogy/Wills.pm: fix $@ clobber bug: Params::Validate::Strict uses
 	  eval internally and resets $@ to '' on successful validation. Added
