@@ -80,6 +80,22 @@ Revision history for Genealogy::Wills
 	- bin/create_db.PL: refactor queue() alias/slash if/elsif: both branches had an
 	  identical two-line body (push @queue + $last=$2); now captures ($alt, $primary)
 	  in the pattern-match phase and executes the shared action once
+	- Add t/edge_cases.t: 35-assertion destructive/boundary/security test suite.
+	  Covers: last field \z-anchor regression (trailing \n proof), null byte
+	  injection, Unicode Cyrillic homograph attack (proves /a modifier), 1/100/101
+	  char boundaries, type confusion (arrayref/hashref/coderef for last), empty-
+	  string and above-max for first/middle/town, XSS payloads (< > blocked),
+	  CRLF and null-byte injection in optional fields, shell metacharacters, year
+	  boundary (0/1/-1/float/non-numeric), DB upstream failures (undef/0/die on
+	  selectall_hashref, die on fetchrow_hashref, new() returns undef), row
+	  corruption (missing url key produces bare 'https://', pre-schemed url gets
+	  doubled), $@ preservation regression (PVS clobber fix), $_ preservation
+	  during list-context and croak-path search(), wrong-class blessed invocant,
+	  unblessed-hashref invocant, /dev/null and file-as-directory in new(),
+	  unreadable config file (non-root SKIP), config file is a directory, alarm()
+	  not consumed by search(), 1000-row stress test (all rows decorated), duplicate
+	  keys last-wins, first=>undef optional field. Documents fragility: // [] guard
+	  only replaces undef; selectall_hashref returning 0 exposes this assumption.
 	- Add t/integration.t: 23-subtest end-to-end integration suite. Covers: complete
 	  new()->search() workflows in list and scalar context; bare-string, hashref, and
 	  named-arg argument forms; config-file-driven construction (YAML); ENV override
