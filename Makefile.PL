@@ -47,7 +47,6 @@ my $prereqs = {
 	'ExtUtils::MakeMaker' => 6.64,	# Minimum version for TEST_REQUIRES
 	'File::Spec' => 0,
 	'File::Temp' => 0,
-	'Module::Info' => 0,
 	'Object::Configure' => 0.23,
 	'Params::Get' => 0.16,
 	'Params::Validate::Strict' => 0.37,

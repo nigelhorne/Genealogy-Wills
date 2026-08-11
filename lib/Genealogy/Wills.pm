@@ -12,7 +12,6 @@ use Data::Reuse;
 use Readonly;
 use File::Spec;
 use Genealogy::Wills::wills;
-use Module::Info;
 use Object::Configure 0.23;
 use Params::Get 0.16;
 use Params::Validate::Strict 0.37;
@@ -41,6 +40,51 @@ Readonly my $MAX_LAST_NAME_LENGTH   => 100;
 # Computed once at module load so the year boundary stays current without
 # redeployment. See LIMITATIONS for the year-boundary edge case.
 Readonly my $MAX_WILL_YEAR => (localtime)[5] + 1900;
+
+# P1: __FILE__ is resolved by the compiler; this never changes at runtime.
+# Replaces Module::Info->new_from_loaded(__PACKAGE__)->file() which scans
+# %INC and allocates a Module::Info object on every new() call that omits
+# 'directory'. Computing it here gives zero per-call overhead.
+my $MODULE_DATA_DIR = do {
+	(my $dir = __FILE__) =~ s/\.pm$//;
+	File::Spec->catfile($dir, 'data');
+};
+
+# P2: The PVS schema is static. Allocating it once here avoids creating
+# 6 anonymous hashrefs (the outer schema + 5 field specs) on every search()
+# call. At 1000 searches/sec that eliminates 6000 transient allocations/sec.
+my $SEARCH_SCHEMA = {
+	'last' => {
+		type    => 'string',
+		min     => $MIN_LAST_NAME_LENGTH,
+		max     => $MAX_LAST_NAME_LENGTH,
+		matches => qr/^[\w\-]+$/
+	},
+	'first' => {
+		type     => 'string',
+		optional => 1,
+		min      => 1,
+		max      => 100
+	},
+	'middle' => {
+		type     => 'string',
+		optional => 1,
+		min      => 1,
+		max      => 100
+	},
+	'town' => {
+		type     => 'string',
+		optional => 1,
+		min      => 1,
+		max      => 100
+	},
+	'year' => {
+		type     => 'integer',
+		optional => 1,
+		min      => 1,
+		max      => $MAX_WILL_YEAR
+	},
+};
 
 =head1 DESCRIPTION
 
@@ -335,11 +379,8 @@ sub new {
 	}
 	$params = Object::Configure::configure($class, $params);
 
-	unless($params->{'directory'}) {
-		my $module_file = Module::Info->new_from_loaded(__PACKAGE__)->file();
-		(my $module_dir = $module_file) =~ s/\.pm$//;
-		$params->{'directory'} = File::Spec->catfile($module_dir, 'data');
-	}
+	# P1: use the compile-time constant; no %INC scan, no object allocation.
+	$params->{'directory'} //= $MODULE_DATA_DIR;
 
 	# P3: -d fills the OS stat cache; -r _ reads it without a second syscall.
 	unless(-d $params->{'directory'} && -r _) {
@@ -501,9 +542,11 @@ C<year>, C<url>.
                     optional => 1 },
     };
 
-C<MAX_WILL_YEAR> is C<(localtime)[5] + 1900> computed once at module load.
+C<$MAX_WILL_YEAR> is C<(localtime)[5] + 1900> computed once at module load.
 C<Params::Get::get_params('last', ...)> maps a bare string argument to
 C<< { last => $string } >> before validation runs.
+The schema hashref itself is a module-level constant allocated once at load
+time and shared across all calls; it is never modified at runtime.
 
 =head4 output
 
@@ -599,40 +642,10 @@ sub search {
 	Carp::croak('search() must be called on an object') unless blessed($self);
 	Carp::croak('Usage: search({ last => $last_name })') unless @_;
 
+	# P2: $SEARCH_SCHEMA is the module-level constant; no per-call allocation.
 	my $params = Params::Validate::Strict::validate_strict({
 		args   => Params::Get::get_params('last', @_),
-		schema => {
-			'last' => {
-				type    => 'string',
-				min     => $MIN_LAST_NAME_LENGTH,
-				max     => $MAX_LAST_NAME_LENGTH,
-				matches => qr/^[\w\-]+$/
-			},
-			'first' => {
-				type     => 'string',
-				optional => 1,
-				min      => 1,
-				max      => 100
-			},
-			'middle' => {
-				type     => 'string',
-				optional => 1,
-				min      => 1,
-				max      => 100
-			},
-			'town' => {
-				type     => 'string',
-				optional => 1,
-				min      => 1,
-				max      => 100
-			},
-			'year' => {
-				type     => 'integer',
-				optional => 1,
-				min      => 1,
-				max      => $MAX_WILL_YEAR
-			}
-		}
+		schema => $SEARCH_SCHEMA,
 	});
 
 	unless(length($params->{'last'} // '')) {

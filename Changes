@@ -26,6 +26,19 @@ Revision history for Genealogy::Wills
 	- Add t/cgi_security.t: 20-subtest penetration test suite covering SQL injection,
 	  XSS, shell injection, CRLF, null bytes, path traversal, type confusion, DoS/ReDoS,
 	  hostile logger injection, CGI QUERY_STRING and POST body simulation; no real DB needed
+	- Performance: replace Module::Info->new_from_loaded(__PACKAGE__)->file() in new()
+	  with a compile-time __FILE__ constant ($MODULE_DATA_DIR) computed once at module
+	  load; eliminates a per-call %INC scan and Module::Info object allocation; removes
+	  Module::Info dependency entirely from module and Makefile.PL
+	- Performance: hoist the Params::Validate::Strict schema out of search() into a
+	  module-level constant ($SEARCH_SCHEMA); eliminates 6 transient hashref allocations
+	  per search() call -- meaningful at high call rates (e.g. 1000 searches/sec)
+	- Performance: bin/create_db.PL: use $dbh->prepare_cached() in flush() instead of
+	  prepare() so the INSERT statement plan is reused across batch flushes
+	- Performance: bin/create_db.PL: replace shift(@lines)-while with for-loop over
+	  split(/\n/,$data); simpler and avoids the slower /$/ms multi-line anchor split
+	- Performance: bin/create_db.PL: remove unused 'use HTML::Entities' (never called;
+	  LWP's decoded_content() handles entity decoding; saves ~3ms at startup)
 	- Logic-reducer: replace use constant with Readonly my $... for all four module
 	  constants (DEFAULT_CACHE_DURATION, MIN/MAX_LAST_NAME_LENGTH, MAX_WILL_YEAR);
 	  remove dead branches in new() (unreachable ::new()-with-args carp, dead clone guard);

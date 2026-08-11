@@ -13,7 +13,6 @@ use Carp ();
 use DBI;
 use File::HomeDir;
 use File::Spec;
-use HTML::Entities;
 use HTTP::Cache::Transparent;
 use LWP::ConnCache;
 use LWP::UserAgent::WithCache;
@@ -135,9 +134,10 @@ sub mrawson {
 	}
 
 	$data =~ s/\r//g;
-	my @lines = split(/$/ms, $data);
 
-	while(my $line = shift(@lines)) {
+	# P4: for-loop over split avoids the shift-while idiom; split on \n is
+	# faster than the /$/ms regex which re-evaluates $ anchors per character.
+	for my $line (split /\n/, $data) {
 		# LAST NAME, First Name; Place of Death; Newspaper date
 		return if($line =~ /Created by/);
 
@@ -192,7 +192,9 @@ sub flush {
 		push @deduped, $item unless $seen{$k}++;
 	}
 
-	my $sth = $dbh->prepare(
+	# P3: prepare_cached reuses the compiled statement plan across flush() calls
+	# rather than re-parsing the INSERT SQL each time.
+	my $sth = $dbh->prepare_cached(
 		'INSERT INTO wills(first, middle, last, town, year, url) VALUES (?, ?, ?, ?, ?, ?)'
 	);
 
