@@ -9,6 +9,7 @@ use autodie qw(:all);
 # the runtime override that Test::Carp installs.
 use Carp ();
 use Data::Reuse;
+use Readonly;
 use File::Spec;
 use Genealogy::Wills::wills;
 use Module::Info;
@@ -22,7 +23,7 @@ use Scalar::Util qw(blessed);
 
 =head1 NAME
 
-Genealogy::Wills - Search a local database of historical wills from Kent, England
+Genealogy::Wills - Search a local database of historical wills
 
 =head1 VERSION
 
@@ -32,13 +33,14 @@ Version 0.10
 
 our $VERSION = '0.10';
 
-use constant {
-	DEFAULT_CACHE_DURATION => '1 day',	# The database is updated daily
-	MIN_LAST_NAME_LENGTH   => 1,
-	MAX_LAST_NAME_LENGTH   => 100,
-	# Computed once at load time so the schema stays current across years
-	MAX_WILL_YEAR          => do { (localtime)[5] + 1900 },
-};
+# Named constants remove all magic literals from the code body.
+# Readonly enforces immutability at runtime; any attempted mutation dies.
+Readonly my $DEFAULT_CACHE_DURATION => '1 day';
+Readonly my $MIN_LAST_NAME_LENGTH   => 1;
+Readonly my $MAX_LAST_NAME_LENGTH   => 100;
+# Computed once at module load so the year boundary stays current without
+# redeployment. See LIMITATIONS for the year-boundary edge case.
+Readonly my $MAX_WILL_YEAR => (localtime)[5] + 1900;
 
 =head1 DESCRIPTION
 
@@ -48,7 +50,7 @@ record when a will is officially accepted (called "probate"). This module gives
 you a simple way to search those records.
 
 The data comes from the B<Kent Wills Transcript>, a free online collection of
-wills proved in Kent, England, covering roughly the 1500s through the 1900s.
+wills proved in Kent, covering roughly the 1500s through the 1900s.
 That data is stored in a local SQLite file (C<wills.sql>), so B<no internet
 connection is needed> when you run a search. The database is built once by
 running C<perl bin/create_db.PL>.
@@ -312,22 +314,21 @@ sub new {
 		$params = Params::Get::get_params(undef, \@_);
 	}
 
+	# Premise: $class is one of three mutually exclusive types:
+	#   (a) undef   -- ::new() function form; any arg would have become $class
+	#   (b) blessed -- called on an existing object (clone request)
+	#   (c) string  -- called as Genealogy::Wills->new() class method
 	if(!defined($class)) {
-		if((scalar keys %{$params}) > 0) {
-			# Using Genealogy::Wills::new(), not Genealogy::Wills->new()
-			Carp::carp(__PACKAGE__ . ': use ->new() not ::new() to instantiate');
-			return;
-		}
-
-		# FIXME: this only works when no arguments are given
+		# (a) ::new() with no args. Params::Get returns {} for empty input,
+		#     so no inner check is needed -- the carp branch was unreachable.
+		#     Conclusion: default the class to this package and proceed normally.
 		$class = __PACKAGE__;
 	} elsif(blessed($class)) {
-		# clone the given object
-		if($params) {
-			return bless { %{$class}, %{$params} }, ref($class);
-		}
-		return bless $class, ref($class);
+		# (b) Clone the object. Merge caller overrides on top of the original;
+		# // {} handles the no-args case where Params::Get returns undef.
+		return bless { %{$class}, %{$params // {}} }, ref($class);
 	}
+	# Post-condition: $class is now a valid package name string.
 
 	if(defined($params->{'config_file'}) && !-r $params->{'config_file'}) {
 		Carp::croak("Can't load configuration from " . $params->{'config_file'});
@@ -340,20 +341,22 @@ sub new {
 		$params->{'directory'} = File::Spec->catfile($module_dir, 'data');
 	}
 
-	unless((-d $params->{'directory'}) && (-r $params->{'directory'})) {
+	# P3: -d fills the OS stat cache; -r _ reads it without a second syscall.
+	unless(-d $params->{'directory'} && -r _) {
 		Carp::carp(__PACKAGE__ . ': ' . $params->{'directory'} . ' is not a directory');
 		return;
 	}
 
 	if(defined $params->{'logger'}) {
-		unless(blessed($params->{'logger'}) && $params->{'logger'}->can('info') && $params->{'logger'}->can('error')) {
-			Carp::croak('Logger must be an object with info() and error() methods');
-		}
+		# Modus Tollens: if the logger cannot satisfy required capabilities, reject now.
+		my $l = $params->{'logger'};
+		Carp::croak('Logger must be an object with info() and error() methods')
+			unless blessed($l) && $l->can('info') && $l->can('error');
 	}
 
-	# cache_duration can be overridden by the args
+	# cache_duration defaults to the module constant; callers may override it.
 	return bless {
-		cache_duration => DEFAULT_CACHE_DURATION,
+		cache_duration => $DEFAULT_CACHE_DURATION,
 		%{$params}
 	}, $class;
 }
@@ -403,8 +406,9 @@ The C<url> field always starts with C<https://>.
 The surname (last name, family name) to search for.
 
 Must be non-empty and contain only letters, digits, underscores (the C<\w>
-set), and hyphens. Any other characters are silently stripped before the
-query runs. For example, C<"O'Brien"> becomes C<"OBrien">.
+set), and hyphens. Any other characters (including apostrophes) cause the
+call to fail validation. For example, C<"O'Brien"> must be passed as
+C<"OBrien">.
 
 The search is B<exact-match>: C<"Smith"> finds only the exact string
 C<"Smith">, not C<"Smithson">.
@@ -493,7 +497,7 @@ C<year>, C<url>.
                 min  => 1, max => 100,
                     optional => 1 },
         year   => { type => 'integer',
-                    min  => 1, max => MAX_WILL_YEAR,
+                    min  => 1, max => $MAX_WILL_YEAR,
                     optional => 1 },
     };
 
@@ -505,13 +509,13 @@ C<< { last => $string } >> before validation runs.
 
     # List context -- no Return::Set wrapping
     Returns: Array of HashRef
-             Each HashRef: { first  => { type => 'string', optional => 1 },
-                             last   => 'string',
-                             middle => { type => 'string', optional => 1 },
-                             town   => { type => 'string', optional => 1 },
+             Each HashRef: { first  => { type => 'string',  optional => 1 },
+                             last   => { type => 'string' },
+                             middle => { type => 'string',  optional => 1 },
+                             town   => { type => 'string',  optional => 1 },
                              year   => { type => 'integer', optional => 1 },
-                             url    => { 'string', matches => qr/^https:\/=// }
-			   }
+                             url    => { type => 'string',  matches  => qr/^https:\/\// },
+                           }
              Empty list when nothing matches.
 
     # Scalar context -- wrapped by Return::Set
@@ -566,7 +570,8 @@ A plain-English description of what C<search()> does, step by step:
     5. If 'last' is undef or empty after parsing, print a warning and return
        nothing (an empty list or undef, depending on context).
 
-    6. Strip any characters from 'last' that are not [\w-].
+    6. (Removed: sanitization was a no-op. Validation in step 4 already
+       enforces [\w-] only via PVS matches => qr/^[\w\-]+$/.)
 
     7. If this is the first search() call on this object, open the SQLite
        database. Reuse the existing connection on subsequent calls.
@@ -599,8 +604,8 @@ sub search {
 		schema => {
 			'last' => {
 				type    => 'string',
-				min     => MIN_LAST_NAME_LENGTH,
-				max     => MAX_LAST_NAME_LENGTH,
+				min     => $MIN_LAST_NAME_LENGTH,
+				max     => $MAX_LAST_NAME_LENGTH,
 				matches => qr/^[\w\-]+$/
 			},
 			'first' => {
@@ -625,7 +630,7 @@ sub search {
 				type     => 'integer',
 				optional => 1,
 				min      => 1,
-				max      => MAX_WILL_YEAR
+				max      => $MAX_WILL_YEAR
 			}
 		}
 	});
@@ -634,22 +639,20 @@ sub search {
 		Carp::carp("Value for 'last' is mandatory");
 		return;
 	}
-
-	# Defence in depth: strip chars not matched by validation regex ([\w-] only;
-	# the apostrophe was previously present here but is not in the validated set)
-	$params->{'last'} =~ s/[^\w\-]//g;
+	# P4 (Transitive Reduction): PVS already enforced matches => qr/^[\w\-]+$/ above.
+	# Any value reaching this point is structurally valid; re-sanitization is a no-op.
 
 	$self->{'wills'} ||= Genealogy::Wills::wills->new(no_entry => 1, no_fixate => 1, %{$self});
 
 	Carp::croak("Can't open the wills database") unless defined($self->{'wills'});
 
 	if(wantarray) {
-		if(my $wills = $self->{'wills'}->selectall_hashref($params)) {
-			$_->{'url'} = 'https://' . $_->{'url'} for @{$wills};
-			Data::Reuse::fixate(@{$wills});
-			return @{$wills};
-		}
-		return;
+		# P5: normalize to [] so the loop and return are unconditional;
+		# eliminates a branch and makes the empty-result path explicit.
+		my $wills = $self->{'wills'}->selectall_hashref($params) // [];
+		$_->{'url'} = 'https://' . $_->{'url'} for @{$wills};
+		Data::Reuse::fixate(@{$wills});
+		return @{$wills};
 	}
 	if(defined(my $will = $self->{'wills'}->fetchrow_hashref($params))) {
 		$will->{'url'} = 'https://' . $will->{'url'};
@@ -705,15 +708,16 @@ C<https://>. Do not add the scheme prefix yourself:
     print $r->{url};               # correct: https://freepages.rootsweb.com/...
     print 'https://' . $r->{url}; # WRONG:   https://https://freepages...
 
-=head2 Apostrophes and punctuation are stripped from last names
+=head2 Apostrophes and punctuation are rejected in last names
 
 The module accepts only word characters (C<\w>) and hyphens in the C<last>
-argument. Any other character, including apostrophes, is silently removed
-before the database query runs.
+argument. Any other character -- including apostrophes -- causes validation
+to fail, not silent stripping.
 
-    $wills->search(last => "O'Brien");  # queries for "OBrien", not "O'Brien"
+    $wills->search(last => "O'Brien");  # FAILS validation; pass "OBrien"
 
-If you expect a record for C<O'Brien>, search for C<OBrien> instead.
+If the record you are looking for has a name like C<O'Brien>, search for
+C<OBrien> instead (that is how it was recorded in the database).
 
 =head2 Search is exact-match -- no wildcards or fuzzy matching
 
@@ -760,6 +764,8 @@ cap will be stale by one year until the module is reloaded.
 =head1 LIMITATIONS
 
 =over 4
+
+=item * Only data from Kent is available at the moment.
 
 =item * B<C<::new()> with arguments is unsupported.>
 

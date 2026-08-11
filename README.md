@@ -1,6 +1,6 @@
 # NAME
 
-Genealogy::Wills - Search a local database of historical wills from Kent, England
+Genealogy::Wills - Search a local database of historical wills
 
 # VERSION
 
@@ -14,7 +14,7 @@ record when a will is officially accepted (called "probate"). This module gives
 you a simple way to search those records.
 
 The data comes from the **Kent Wills Transcript**, a free online collection of
-wills proved in Kent, England, covering roughly the 1500s through the 1900s.
+wills proved in Kent, covering roughly the 1500s through the 1900s.
 That data is stored in a local SQLite file (`wills.sql`), so **no internet
 connection is needed** when you run a search. The database is built once by
 running `perl bin/create_db.PL`.
@@ -290,8 +290,9 @@ The `url` field always starts with `https://`.
     The surname (last name, family name) to search for.
 
     Must be non-empty and contain only letters, digits, underscores (the `\w`
-    set), and hyphens. Any other characters are silently stripped before the
-    query runs. For example, `"O'Brien"` becomes `"OBrien"`.
+    set), and hyphens. Any other characters (including apostrophes) cause the
+    call to fail validation. For example, `"O'Brien"` must be passed as
+    `"OBrien"`.
 
     The search is **exact-match**: `"Smith"` finds only the exact string
     `"Smith"`, not `"Smithson"`.
@@ -378,7 +379,7 @@ Each hash reference has these keys: `first`, `last`, `middle`, `town`,
                 min  => 1, max => 100,
                     optional => 1 },
         year   => { type => 'integer',
-                    min  => 1, max => MAX_WILL_YEAR,
+                    min  => 1, max => $MAX_WILL_YEAR,
                     optional => 1 },
     };
 
@@ -390,12 +391,12 @@ Each hash reference has these keys: `first`, `last`, `middle`, `town`,
 
     # List context -- no Return::Set wrapping
     Returns: Array of HashRef
-             Each HashRef: { first  => { type => 'string', optional => 1 },
-                             last   => 'string',
-                             middle => { type => 'string', optional => 1 },
-                             town   => { type => 'string', optional => 1 },
+             Each HashRef: { first  => { type => 'string',  optional => 1 },
+                             last   => { type => 'string' },
+                             middle => { type => 'string',  optional => 1 },
+                             town   => { type => 'string',  optional => 1 },
                              year   => { type => 'integer', optional => 1 },
-                             url    => { 'string', matches => qr/^https:\/=// }
+                             url    => { type => 'string',  matches  => qr/^https:\/\// },
                            }
              Empty list when nothing matches.
 
@@ -447,7 +448,8 @@ A plain-English description of what `search()` does, step by step:
     5. If 'last' is undef or empty after parsing, print a warning and return
        nothing (an empty list or undef, depending on context).
 
-    6. Strip any characters from 'last' that are not [\w-].
+    6. (Removed: sanitization was a no-op. Validation in step 4 already
+       enforces [\w-] only via PVS matches => qr/^[\w\-]+$/.)
 
     7. If this is the first search() call on this object, open the SQLite
        database. Reuse the existing connection on subsequent calls.
@@ -513,15 +515,16 @@ Every returned record has its `url` field set to a full URL starting with
     print $r->{url};               # correct: https://freepages.rootsweb.com/...
     print 'https://' . $r->{url}; # WRONG:   https://https://freepages...
 
-## Apostrophes and punctuation are stripped from last names
+## Apostrophes and punctuation are rejected in last names
 
 The module accepts only word characters (`\w`) and hyphens in the `last`
-argument. Any other character, including apostrophes, is silently removed
-before the database query runs.
+argument. Any other character -- including apostrophes -- causes validation
+to fail, not silent stripping.
 
-    $wills->search(last => "O'Brien");  # queries for "OBrien", not "O'Brien"
+    $wills->search(last => "O'Brien");  # FAILS validation; pass "OBrien"
 
-If you expect a record for `O'Brien`, search for `OBrien` instead.
+If the record you are looking for has a name like `O'Brien`, search for
+`OBrien` instead (that is how it was recorded in the database).
 
 ## Search is exact-match -- no wildcards or fuzzy matching
 
@@ -567,6 +570,7 @@ cap will be stale by one year until the module is reloaded.
 
 # LIMITATIONS
 
+- Only data from Kent is available at the moment.
 - **`::new()` with arguments is unsupported.**
 
     `Genealogy::Wills::new('Smith')` shifts `'Smith'` into `$class` and
