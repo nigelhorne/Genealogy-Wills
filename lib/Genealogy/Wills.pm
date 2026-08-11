@@ -376,6 +376,20 @@ sub new {
 	if(defined($params->{'config_file'}) && !-r $params->{'config_file'}) {
 		Carp::croak("Can't load configuration from " . $params->{'config_file'});
 	}
+
+	# Validate the caller-supplied logger BEFORE Object::Configure::configure()
+	# runs. configure() always replaces the logger with its own Log::Abstraction
+	# instance (see LIMITATIONS, "logger argument is silently discarded"), so any
+	# check performed AFTER configure() would be testing the replacement object,
+	# not the one the caller passed. Validating here ensures that a caller who
+	# passes an object lacking info()/error() gets an early, actionable croak.
+	if(defined $params->{'logger'}) {
+		# Modus Tollens: if the logger cannot satisfy required capabilities, reject now.
+		my $l = $params->{'logger'};
+		Carp::croak('Logger must be an object with info() and error() methods')
+			unless blessed($l) && $l->can('info') && $l->can('error');
+	}
+
 	$params = Object::Configure::configure($class, $params);
 
 	# use the compile-time constant; no %INC scan, no object allocation.
@@ -385,13 +399,6 @@ sub new {
 	unless(-d $params->{'directory'} && -r _) {
 		Carp::carp(__PACKAGE__ . ': ' . $params->{'directory'} . ' is not a directory');
 		return;
-	}
-
-	if(defined $params->{'logger'}) {
-		# Modus Tollens: if the logger cannot satisfy required capabilities, reject now.
-		my $l = $params->{'logger'};
-		Carp::croak('Logger must be an object with info() and error() methods')
-			unless blessed($l) && $l->can('info') && $l->can('error');
 	}
 
 	# cache_duration defaults to the module constant; callers may override it.

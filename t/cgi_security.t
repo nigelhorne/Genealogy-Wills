@@ -558,50 +558,46 @@ subtest 'malicious config_file in new()' => sub {
 # Exploit: attacker passes a blessed object whose methods execute arbitrary
 # code, or a plain string like 'system("id")', as the logger argument.
 #
-# FINDING: Object::Configure::configure() always replaces the caller-supplied
-# logger with a Log::Abstraction object, regardless of what was passed.
-# The module-level logger validation check (blessed && can 'info' && can 'error')
-# therefore runs against the Object::Configure-provided logger, NOT the
-# caller's object. The caller's logger is silently discarded.
+# DEFENCE (APPLIED FIX): The logger validation check runs BEFORE
+# Object::Configure::configure() -- so a bad logger causes an immediate croak
+# rather than being silently replaced.  This blocks injection of
+# objects that lack info()/error() (including unblessed values) and surfaces
+# a clear error to callers who supply an invalid logger.
 #
-# Security implication (positive): an attacker CANNOT inject a hostile logger
-# object into the runtime execution path because Object::Configure replaces
-# it before any code uses it.
+# A trojan logger that DOES implement info()/error() passes the validation
+# gate but is subsequently replaced by Object::Configure's own Log::Abstraction
+# logger -- so exec_shell-style extra methods are never called via the module.
 #
-# UX implication (negative): callers who supply a valid logger will find it
-# silently ignored. This is a LIMITATION to document, not a security risk.
+# Security outcome:
+#   - Missing-interface loggers  → croak (caught early, no silent bypass)
+#   - Valid-interface trojans    → accepted by validation, replaced by configure()
 # ===========================================================================
 
 subtest 'hostile logger injection via new()' => sub {
-	# Bad logger (no info/error methods): Object::Configure replaces it with
-	# Log::Abstraction before the validation check runs. No croak fires; the
-	# resulting object has a valid Log::Abstraction logger instead.
+	# Bad logger (no info/error methods): croak fires BEFORE configure() can
+	# replace it.  This is the corrected behaviour after the bug-fix that moved
+	# the validation check before Object::Configure::configure().
 	{
 		my $bad = bless {}, 'MockBadLogger';
-		my $obj2;
-		lives_ok(
-			sub { $obj2 = Genealogy::Wills->new(directory => $temp_dir, logger => $bad) },
-			'bad logger is silently replaced by Object::Configure -- no croak'
+		throws_ok(
+			sub { Genealogy::Wills->new(directory => $temp_dir, logger => $bad) },
+			qr/Logger must be an object with info\(\) and error\(\)/,
+			'bad logger (missing interface) causes an immediate croak'
 		);
-		ok(blessed($obj2), 'object is still created safely despite bad logger arg');
-		my $actual_logger = $obj2->{logger};
-		ok(blessed($actual_logger) && $actual_logger->can('info'),
-			'actual stored logger is a valid Object::Configure-supplied object');
 	}
 
-	# Non-object scalar -- Object::Configure replaces it; module still safe
+	# Non-object scalar (e.g. 'system("id")') is not blessed -- croak fires.
 	{
-		my $obj3;
-		lives_ok(
-			sub { $obj3 = Genealogy::Wills->new(directory => $temp_dir, logger => 'system("id")') },
-			'scalar string logger is silently replaced by Object::Configure'
+		throws_ok(
+			sub { Genealogy::Wills->new(directory => $temp_dir, logger => 'system("id")') },
+			qr/Logger must be an object with info\(\) and error\(\)/,
+			'scalar string logger causes croak (not blessed)'
 		);
-		ok(blessed($obj3->{logger}),
-			'stored logger is a blessed object even when a string was supplied');
 	}
 
-	# Trojan logger with correct interface but malicious extra method.
-	# Object::Configure replaces it -- exec_shell is never reachable via the module.
+	# Trojan logger with a correct interface but a malicious extra method.
+	# The validation gate passes (info + error present), but Object::Configure
+	# then replaces the logger with its own -- so exec_shell is never called.
 	# State is stored in the object (not a lexical-in-package) to avoid
 	# the "variable not available" warning from nested package declarations.
 	{
@@ -615,19 +611,18 @@ subtest 'hostile logger injection via new()' => sub {
 		my $obj4;
 		lives_ok(
 			sub { $obj4 = Genealogy::Wills->new(directory => $temp_dir, logger => $trojan) },
-			'trojan logger accepted (Object::Configure replaces it anyway)'
+			'trojan logger (valid interface) passes validation -- Object::Configure then replaces it'
 		);
 		is($trojan->{breach}, 0, 'exec_shell was NEVER invoked during new()');
-		is($trojan->{calls},  0, 'info/error were not called during new()');
+		is($trojan->{calls},  0, 'info/error were NOT called during new()');
 		ok(blessed($obj4->{logger}) && ref($obj4->{logger}) ne 'MockTrojanLogger',
-			'stored logger is NOT the trojan object -- Object::Configure replaced it');
+			'stored logger is the Object::Configure replacement, NOT the trojan');
 	}
 
 	note(
-		'SECURITY FINDING: Object::Configure always supplies its own logger. ' .
-		'The caller-supplied logger (valid or not) is discarded. ' .
-		'This is a strength against logger injection but a usability limitation ' .
-		'for callers who need a custom logger. Document in LIMITATIONS POD.'
+		'SECURITY FINDING (updated): Bad-interface loggers now croak early (before configure). ' .
+		'Valid-interface trojans pass validation but are replaced by Object::Configure. ' .
+		'net result: exec_shell-style injection via logger is blocked on both paths.'
 	);
 };
 
