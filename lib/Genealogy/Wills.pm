@@ -7,10 +7,10 @@ use Data::Reuse;
 use File::Spec;
 use Genealogy::Wills::wills;
 use Module::Info;
-use Object::Configure 0.12;
-use Params::Get 0.13;
-use Params::Validate::Strict 0.09;
-use Return::Set;
+use Object::Configure 0.23;
+use Params::Get 0.16;
+use Params::Validate::Strict 0.37;
+use Return::Set 0.05;
 use Scalar::Util;
 
 =head1 NAME
@@ -110,6 +110,9 @@ sub new
 	}
 
 	# Load the configuration from a config file, if provided
+	if(defined($params->{'config_file'}) && !-r $params->{'config_file'}) {
+		Carp::croak("Can't load configuration from " . $params->{'config_file'});
+	}
 	$params = Object::Configure::configure($class, $params);
 
 	if(!defined(my $directory = ($params->{'directory'} || $Genealogy::Wills::wills->{'directory'}))) {
@@ -161,6 +164,8 @@ sub search {
 
 	# Ensure $self is valid
 	Carp::croak('search() must be called on an object') unless(Scalar::Util::blessed($self));
+
+	Carp::croak('Usage: search({ last => $last_name })') unless @_;
 
         my $params = Params::Validate::Strict::validate_strict({
 		args => Params::Get::get_params('last', @_),

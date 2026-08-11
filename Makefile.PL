@@ -40,7 +40,7 @@ my $prereqs = {
 	'constant' => 0,
 	'Carp' => 0,
 	'Data::Reuse' => 0,
-	'Database::Abstraction' => 0.04,
+	'Database::Abstraction' => 0.37,
 	'DBD::SQLite' => 0,
 	'DBD::SQLite::Constants' => 0,
 	'Error::Simple' => 0,
@@ -51,10 +51,10 @@ my $prereqs = {
 	'File::Spec' => 0,
 	'File::Temp' => 0,
 	'Module::Info' => 0,
-	'Object::Configure' => 0.12,
-	'Params::Get' => 0.13,
-	'Params::Validate::Strict' => 0.09,
-	'Return::Set' => 0,
+	'Object::Configure' => 0.23,
+	'Params::Get' => 0.16,
+	'Params::Validate::Strict' => 0.37,
+	'Return::Set' => 0.05,
 	'Scalar::Util' => 0
 };
 

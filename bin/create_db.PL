@@ -87,7 +87,7 @@ HTTP::Cache::Transparent::init({
 
 my $ua = LWP::UserAgent::WithCache->new(timeout => 10, keep_alive => 1);
 $ua->env_proxy(1);
-$ua->agent('Mozilla/5.0');
+$ua->agent('Genealogy::Wills');
 $ua->conn_cache()->total_capacity(undef);
 $Lingua::EN::NameCase::POSTNOMINAL = 0;
 
