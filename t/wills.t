@@ -5,10 +5,7 @@ use Test::Most;
 use Test::Needs 'Test::HTTPStatus';
 use Test::Returns;
 use Test::Warnings;
-
-use lib 'lib';
-use lib 't/lib';
-use MyLogger;
+use Test::Log::Abstraction;
 
 BEGIN {
 	use_ok('Genealogy::Wills');
@@ -24,7 +21,7 @@ SKIP: {
 		require Data::Dumper;
 		Data::Dumper->import();
 
-		Database::Abstraction::init(logger => MyLogger->new());
+		Database::Abstraction::init(logger => Test::Log::Abstraction->new());
 	}
 	my $search = new_ok('Genealogy::Wills');
 

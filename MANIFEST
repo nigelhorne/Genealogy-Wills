@@ -22,7 +22,6 @@ t/extended_tests.t
 t/fixme.t
 t/function.t
 t/integration.t
-t/lib/MyLogger.pm
 t/locales.t
 t/no404s.t
 t/noopentickets.t

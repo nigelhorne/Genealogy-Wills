@@ -1,5 +1,9 @@
 Revision history for Genealogy::Wills
 
+0.12
+	[ Tests ]
+	- Use Test::Log::Abstraction
+
 0.11	Tue Aug 11 07:40:15 PM EDT 2026
 	[ Enhancements ]
 	- Add t/path.t: 35-subtest exhaustive CFG path-coverage suite (LCSAJ/TER3).
