@@ -611,15 +611,15 @@ A plain-English description of what C<search()> does, step by step:
          - A single bare string becomes { last => $string }.
          - A hash reference or flat key-value list is used as-is.
 
-    4. Validate the parsed arguments:
+    4. If 'last' is undef after parsing, print a warning and return
+       nothing (an empty list or undef, depending on context).
+
+    5. Validate the parsed arguments:
          - 'last' must match /^[\w-]+$/ and be 1-100 characters.
          - 'first', 'middle', 'town': optional strings, 1-100 characters each.
          - 'year': optional integer between 1 and the current year.
 
-    5. If 'last' is undef or empty after parsing, print a warning and return
-       nothing (an empty list or undef, depending on context).
-
-    6. (Removed: sanitization was a no-op. Validation in step 4 already
+    6. (Removed: sanitization was a no-op. Validation in step 5 already
        enforces [\w-] only via PVS matches => qr/^[\w-]+\z/a.)
 
     7. If this is the first search() call on this object, open the SQLite
@@ -648,21 +648,25 @@ sub search {
 	Carp::croak('search() must be called on an object') unless blessed($self);
 	Carp::croak('Usage: search({ last => $last_name })') unless @_;
 
+	my $args = Params::Get::get_params('last', @_);
+
+	# Checked before validation: Params::Validate::Strict >= 0.41 croaks on an
+	# undef required string, which would bypass this documented carp-and-return.
+	unless(defined($args->{'last'})) {
+		Carp::carp("Value for 'last' is mandatory");
+		return;
+	}
+
 	# $SEARCH_SCHEMA is the module-level constant; no per-call allocation.
 	# local $@ guards against Params::Validate::Strict's internal eval() calls
 	# resetting the caller's $@ to '' on a successful validation pass.
 	my $params = do {
 		local $@;
 		Params::Validate::Strict::validate_strict({
-			args   => Params::Get::get_params('last', @_),
+			args   => $args,
 			schema => $SEARCH_SCHEMA,
 		});
 	};
-
-	unless(length($params->{'last'} // '')) {
-		Carp::carp("Value for 'last' is mandatory");
-		return;
-	}
 	# (Transitive Reduction): PVS already enforced matches => qr/^[\w-]+\z/a above.
 	# Any value reaching this point is structurally valid; re-sanitization is a no-op.
 

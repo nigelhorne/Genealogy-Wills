@@ -4,6 +4,39 @@
 #
 # -f:	force a build, otherwise it won't build on CPAN smokers or if the
 #	database is less than a day old
+#
+# WILLSARCHIVE_DIR
+#	Absolute path to a directory holding locally saved copies of the
+#	mrawson will index pages.  When set, the pages are read from that
+#	directory instead of being downloaded, and no network access is made.
+#
+#	Why: freepages.rootsweb.com sits behind Cloudflare bot protection,
+#	which answers every non-browser client (LWP, curl, wget) with
+#	"403 Forbidden" and a body of "{}".  Cloudflare fingerprints the
+#	TLS/HTTP connection and runs a JavaScript challenge, so changing the
+#	User-Agent header does not help.  A real browser passes the check,
+#	so the pages can be saved from one and loaded from disk here.
+#
+#	The directory must contain all eight pages, saved under their
+#	original file names:
+#
+#		will_ab.html  will_c.html   will_dg.html  will_hj.html
+#		will_km.html  will_nr.html  will_sv.html  will_wy.html
+#
+#	from https://freepages.rootsweb.com/~mrawson/genealogy/will_XX.html.
+#	In the browser use "Save Page As..." with the "Web Page, HTML only"
+#	format (the parser needs the raw HTML, not a "complete" page or a
+#	text dump).  Files may be UTF-8 or Windows-1252/Latin-1 encoded.
+#
+#	Then build with, for example:
+#
+#		WILLSARCHIVE_DIR=$HOME/wills-archive perl bin/create_db.PL -f
+#	or
+#		WILLSARCHIVE_DIR=$HOME/wills-archive make
+#
+#	The path must be absolute; a missing or unreadable page is fatal so
+#	that a partial database is never built.  The resulting database
+#	stores the same freepages.rootsweb.com URLs as a downloaded build.
 
 use strict;
 use warnings;
@@ -11,6 +44,7 @@ use autodie qw(:all);
 use feature 'state';
 use Carp ();
 use DBI;
+use Encode ();
 use File::HomeDir;
 use File::Spec;
 use HTTP::Cache::Transparent;
@@ -132,17 +166,48 @@ sub mrawson {
 
 	# local $| flushes immediately and restores on scope exit
 	local $| = 1;
-	printf "%-70s\r", $url;
-
-	my $response = $ua->get($url);
 
 	my $data;
-	if($response->is_success) {
-		$data = $response->decoded_content();
+	if(my $archive = $ENV{'WILLSARCHIVE_DIR'}) {
+		# Read a browser-saved copy instead of fetching (see the comment at
+		# the top of this file for why). $page comes from the fixed list in
+		# the main loop, but still confine the path to the base directory.
+		my $base = File::Spec->canonpath($archive);
+		Carp::croak("WILLSARCHIVE_DIR '$base' must be an absolute path")
+			unless File::Spec->file_name_is_absolute($base);
+		my $local = File::Spec->catfile($base, "will_$page.html");
+		Carp::croak("WILLSARCHIVE_DIR path escapes base directory: $local")
+			unless index(File::Spec->canonpath($local), $base) == 0;
+		Carp::croak("\n$local: not found or not readable (WILLSARCHIVE_DIR needs all eight will_*.html pages)")
+			unless -f $local && -r $local;
+
+		printf "%-70s\r", $local;
+
+		open(my $fin, '<:raw', $local);
+		my $bytes = do { local $/; <$fin> };
+		close $fin;
+
+		# Browsers save in the page's own charset; try UTF-8 first and fall
+		# back to Windows-1252 (a superset of Latin-1) for older pages.
+		$data = eval { Encode::decode('UTF-8', $bytes, Encode::FB_CROAK | Encode::LEAVE_SRC) }
+			// Encode::decode('cp1252', $bytes);
 	} else {
-		# status_line() comes from the upstream server; concatenate (not
-		# comma-list) to form one string before passing to Carp::croak.
-		Carp::croak("\n$url: " . $response->status_line());
+		printf "%-70s\r", $url;
+
+		my $response = $ua->get($url);
+
+		if($response->is_success) {
+			$data = $response->decoded_content();
+		} else {
+			# status_line() comes from the upstream server; concatenate (not
+			# comma-list) to form one string before passing to Carp::croak.
+			# A 403 is almost always Cloudflare bot protection - point the
+			# user at the local-archive workaround.
+			Carp::croak("\n$url: " . $response->status_line()
+				. ($response->code() == 403
+					? "\nSave the will_*.html pages from a browser and set WILLSARCHIVE_DIR (see $0)"
+					: ''));
+		}
 	}
 
 	$data =~ s/\r//g;
@@ -167,7 +232,7 @@ sub mrawson {
 			( [^,<>]+ )         # $2: last name - bounded by comma; no angle-brackets
 			,\s+
 			( [^<]+? )          # $3: first name - non-greedy; terminates before </a>
-			\s+</a>\s+of\s+
+			\s*</a>\s+of\s+     # \s* - some entries have no space before </a>
 			( .+? )             # $4: town - non-greedy; year anchor stops it correctly
 			\s( \d{4} )         # $5: year - exactly 4 decimal digits; \s = separator
 		}x;

@@ -1,6 +1,15 @@
 Revision history for Genealogy::Wills
 
 0.12
+	[ Enhancements ]
+	- bin/create_db.PL: add WILLSARCHIVE_DIR to build from browser-saved
+	  copies of the will_*.html pages, since freepages.rootsweb.com now
+	  returns 403 to all non-browser clients (Cloudflare bot protection)
+	- bin/create_db.PL: accept entries with no space before </a>
+	[ Bug Fixes ]
+	- search(): check for an undef last before validation so it still carps
+	  "Value for 'last' is mandatory" and returns; Params::Validate::Strict
+	  0.41 croaks on an undef required string instead
 	[ Tests ]
 	- Use Test::Log::Abstraction
 

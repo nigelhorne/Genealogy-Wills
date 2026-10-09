@@ -54,6 +54,7 @@ my $prereqs = {
 
 unless(defined($ENV{'AUTOMATED_TESTING'})) {
 	$prereqs->{'DBI'} = 0;
+	$prereqs->{'Encode'} = 0;
 	$prereqs->{'File::HomeDir'} = 0;
 	$prereqs->{'HTTP::Cache::Transparent'} = 0;
 	$prereqs->{'LWP::ConnCache'} = 0;
